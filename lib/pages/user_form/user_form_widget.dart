@@ -1,3 +1,4 @@
+// Import necessary packages and files
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_drop_down.dart';
@@ -12,6 +13,7 @@ import 'package:flutter/scheduler.dart';
 import 'user_form_model.dart';
 export 'user_form_model.dart';
 
+/// Widget for the user form page
 class UserFormWidget extends StatefulWidget {
   const UserFormWidget({super.key});
 
@@ -29,7 +31,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
     super.initState();
     _model = createModel(context, () => UserFormModel());
 
-    // On page load action.
+    // On page load action
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       // Get User Preference Document
       _model.userPrefDoc = await queryUserPrefRecordOnce(
@@ -39,6 +41,8 @@ class _UserFormWidgetState extends State<UserFormWidget> {
         ),
         singleRecord: true,
       ).then((s) => s.firstOrNull);
+      
+      // If user preference document exists, populate form fields
       if (_model.userPrefDoc != null) {
         _model.heightState = _model.userPrefDoc?.height;
         _model.weightState = _model.userPrefDoc?.weight;
@@ -48,6 +52,8 @@ class _UserFormWidgetState extends State<UserFormWidget> {
         _model.foodPrefState = _model.userPrefDoc?.foodPrefer;
         _model.foodAllergyState = _model.userPrefDoc?.foodAllergy;
         _model.fitnessGoalState = _model.userPrefDoc?.fitnessGoal;
+        
+        // Update state and form controllers
         safeSetState(() {});
         safeSetState(() {
           _model.heightTextController?.text =
@@ -89,6 +95,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
       }
     });
 
+    // Initialize text controllers and focus nodes
     _model.fullNameTextController ??=
         TextEditingController(text: currentUserDisplayName);
     _model.fullNameFocusNode ??= FocusNode();
@@ -110,7 +117,6 @@ class _UserFormWidgetState extends State<UserFormWidget> {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -178,6 +184,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
                                 mainAxisSize: MainAxisSize.max,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
+                                  // Full Name input field
                                   AuthUserStreamWidget(
                                     builder: (context) => TextFormField(
                                       controller: _model.fullNameTextController,
@@ -273,6 +280,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
                                           .asValidator(context),
                                     ),
                                   ),
+                                  // Height input field
                                   TextFormField(
                                     controller: _model.heightTextController,
                                     focusNode: _model.heightFocusNode,
@@ -368,6 +376,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
                                         .heightTextControllerValidator
                                         .asValidator(context),
                                   ),
+                                  // Weight input field
                                   TextFormField(
                                     controller: _model.weightTextController,
                                     focusNode: _model.weightFocusNode,
@@ -463,6 +472,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
                                         .weightTextControllerValidator
                                         .asValidator(context),
                                   ),
+                                  // Date of Birth input field
                                   TextFormField(
                                     controller:
                                         _model.dateOfBirthTextController,
@@ -558,6 +568,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
                                         .asValidator(context),
                                     inputFormatters: [_model.dateOfBirthMask],
                                   ),
+                                  // Gender dropdown
                                   Text(
                                     'Gender',
                                     style: FlutterFlowTheme.of(context)
@@ -610,6 +621,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
                                     isSearchable: false,
                                     isMultiSelect: false,
                                   ),
+                                  // Exercise Level dropdown
                                   Text(
                                     'Exercise Level',
                                     style: FlutterFlowTheme.of(context)
@@ -663,6 +675,7 @@ class _UserFormWidgetState extends State<UserFormWidget> {
                                     isSearchable: false,
                                     isMultiSelect: false,
                                   ),
+                                  // Food Preference dropdown
                                   Text(
                                     'Food Preference',
                                     style: FlutterFlowTheme.of(context)

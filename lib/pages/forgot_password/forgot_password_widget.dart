@@ -1,3 +1,4 @@
+// Import necessary packages and modules
 import '/auth/firebase_auth/auth_util.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'forgot_password_model.dart';
 export 'forgot_password_model.dart';
 
+/// Widget for the Forgot Password screen
 class ForgotPasswordWidget extends StatefulWidget {
   const ForgotPasswordWidget({super.key});
 
@@ -24,6 +26,7 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
     super.initState();
     _model = createModel(context, () => ForgotPasswordModel());
 
+    // Initialize text controller and focus node for email input
     _model.emailAddressTextController ??= TextEditingController();
     _model.emailAddressFocusNode ??= FocusNode();
   }
@@ -31,7 +34,6 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -73,7 +75,7 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // This row exists for when the "app bar" is hidden on desktop, having a way back for the user can work well.
+              // Back button for desktop view
               if (responsiveVisibility(
                 context: context,
                 phone: false,
@@ -118,6 +120,7 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
                     ),
                   ),
                 ),
+              // Title
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
                 child: Text(
@@ -128,6 +131,7 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
                       ),
                 ),
               ),
+              // Description
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(16.0, 4.0, 16.0, 4.0),
                 child: Text(
@@ -138,6 +142,7 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
                       ),
                 ),
               ),
+              // Email input field
               Padding(
                 padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 0.0),
                 child: SizedBox(
@@ -206,12 +211,14 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
                   ),
                 ),
               ),
+              // Send Link button
               Align(
                 alignment: const AlignmentDirectional(0.0, 0.0),
                 child: Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 0.0),
                   child: FFButtonWidget(
                     onPressed: () async {
+                      // Validate email input
                       if (_model.emailAddressTextController.text.isEmpty) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -222,10 +229,12 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
                         );
                         return;
                       }
+                      // Send password reset email
                       await authManager.resetPassword(
                         email: _model.emailAddressTextController.text,
                         context: context,
                       );
+                      // Show confirmation dialog
                       await showDialog(
                         context: context,
                         builder: (alertDialogContext) {
@@ -244,6 +253,7 @@ class _ForgotPasswordWidgetState extends State<ForgotPasswordWidget> {
                           );
                         },
                       );
+                      // Navigate back
                       context.safePop();
                     },
                     text: 'Send Link',

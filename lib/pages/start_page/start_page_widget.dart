@@ -1,3 +1,4 @@
+// Import necessary packages and files
 import '/auth/firebase_auth/auth_util.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
@@ -7,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'start_page_model.dart';
 export 'start_page_model.dart';
 
+/// Widget for the start page of the application
 class StartPageWidget extends StatefulWidget {
   const StartPageWidget({super.key});
 
@@ -28,7 +30,6 @@ class _StartPageWidgetState extends State<StartPageWidget> {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -52,6 +53,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
+                // Top section with background image and app title
                 Expanded(
                   child: Container(
                     width: double.infinity,
@@ -96,12 +98,14 @@ class _StartPageWidgetState extends State<StartPageWidget> {
                     ),
                   ),
                 ),
+                // Bottom section with sign-up and login options
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(0.0, 44.0, 0.0, 0.0),
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      // Sign up with email button
                       Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
                             16.0, 12.0, 16.0, 16.0),
@@ -146,6 +150,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
                           ),
                         ),
                       ),
+                      // Login link
                       Padding(
                         padding:
                             const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 12.0),
@@ -187,6 +192,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
                           ),
                         ),
                       ),
+                      // Separator
                       Padding(
                         padding:
                             const EdgeInsetsDirectional.fromSTEB(0.0, 6.0, 0.0, 6.0),
@@ -199,12 +205,12 @@ class _StartPageWidgetState extends State<StartPageWidget> {
                                   ),
                         ),
                       ),
+                      // Continue with Google button
                       Padding(
                         padding: const EdgeInsetsDirectional.fromSTEB(
                             16.0, 12.0, 16.0, 100.0),
                         child: FFButtonWidget(
                           onPressed: () async {
-                            // After successful login, this will insert the user's account details, such as email, name, and photo, into the 'users' collection. If a user already exists, it won't add details again.
                             // Authenticate with Google
                             GoRouter.of(context).prepareAuthEvent();
                             final user =
@@ -212,8 +218,7 @@ class _StartPageWidgetState extends State<StartPageWidget> {
                             if (user == null) {
                               return;
                             }
-                            // Move To User Form
-
+                            // Navigate to User Form after successful authentication
                             context.pushNamedAuth('User_Form', context.mounted);
                           },
                           text: 'Continue with Google',

@@ -1,3 +1,4 @@
+// Import necessary packages and files
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/backend/gemini/gemini.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'recipe_model.dart';
 export 'recipe_model.dart';
 
+// Define the RecipeWidget stateful widget
 class RecipeWidget extends StatefulWidget {
   const RecipeWidget({
     super.key,
@@ -23,6 +25,7 @@ class RecipeWidget extends StatefulWidget {
     required this.otherIngredients,
   });
 
+  // Define the properties of the widget
   final String? picURL;
   final FFUploadedFile? fridgePic;
   final RecipeDTStruct? recipeData;
@@ -49,7 +52,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -110,6 +112,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                   child: Column(
                     mainAxisSize: MainAxisSize.max,
                     children: [
+                      // Recipe details section
                       Align(
                         alignment: const AlignmentDirectional(-1.0, 0.0),
                         child: Padding(
@@ -118,6 +121,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                           child: Column(
                             mainAxisSize: MainAxisSize.max,
                             children: [
+                              // Recipe name
                               Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
                                     0.0, 40.0, 0.0, 0.0),
@@ -135,6 +139,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                       ),
                                 ),
                               ),
+                              // Recipe image
                               Align(
                                 alignment: const AlignmentDirectional(0.0, 0.0),
                                 child: Padding(
@@ -150,6 +155,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                   ),
                                 ),
                               ),
+                              // Calorie information
                               Align(
                                 alignment: const AlignmentDirectional(-1.0, 0.0),
                                 child: Padding(
@@ -158,6 +164,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                   child: Column(
                                     mainAxisSize: MainAxisSize.max,
                                     children: [
+                                      // Calories header
                                       Align(
                                         alignment:
                                             const AlignmentDirectional(-1.0, 0.0),
@@ -173,6 +180,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                               ),
                                         ),
                                       ),
+                                      // Total calories
                                       Align(
                                         alignment:
                                             const AlignmentDirectional(0.0, 0.0),
@@ -225,6 +233,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                           ),
                                         ),
                                       ),
+                                      // Carbs information
                                       Align(
                                         alignment:
                                             const AlignmentDirectional(0.0, 0.0),
@@ -277,6 +286,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                           ),
                                         ),
                                       ),
+                                      // Fats information
                                       Align(
                                         alignment:
                                             const AlignmentDirectional(0.0, 0.0),
@@ -321,6 +331,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                           ],
                                         ),
                                       ),
+                                      // Proteins information
                                       Align(
                                         alignment:
                                             const AlignmentDirectional(0.0, 0.0),
@@ -368,6 +379,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                   ),
                                 ),
                               ),
+                              // Ingredients section
                               Align(
                                 alignment: const AlignmentDirectional(-1.0, 0.0),
                                 child: Padding(
@@ -410,6 +422,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                   ),
                                 ),
                               ),
+                              // Steps section
                               Align(
                                 alignment: const AlignmentDirectional(-1.0, 0.0),
                                 child: Padding(
@@ -463,12 +476,14 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                           ),
                         ),
                       ),
+                      // Action buttons
                       Align(
                         alignment: const AlignmentDirectional(0.0, 0.0),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            // Regenerate button
                             Align(
                               alignment: const AlignmentDirectional(0.0, 0.0),
                               child: Padding(
@@ -506,7 +521,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                         ),
                                       );
                                       // Go To Recipe Page
-
                                       context.pushNamed(
                                         'Recipe',
                                         queryParameters: {
@@ -593,6 +607,7 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                 ),
                               ),
                             ),
+                            // Save button
                             Align(
                               alignment: const AlignmentDirectional(0.0, 0.0),
                               child: Padding(
@@ -629,7 +644,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                             false;
                                     if (confirmDialogResponse) {
                                       // Save Calories to DB
-
                                       await MealTrackingRecord.collection
                                           .doc()
                                           .set({
@@ -656,7 +670,6 @@ class _RecipeWidgetState extends State<RecipeWidget> {
                                     }
 
                                     // Go To Homepage
-
                                     context.pushNamed('Home_Page');
                                   },
                                   text: 'Save',

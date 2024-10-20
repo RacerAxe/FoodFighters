@@ -14,7 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../main.dart';
 
-
+// Export commonly used utilities and models
 export 'lat_lng.dart';
 export 'place.dart';
 export 'uploaded_file.dart';
@@ -28,9 +28,11 @@ export 'package:cloud_firestore/cloud_firestore.dart'
 export 'package:page_transition/page_transition.dart';
 export 'nav/nav.dart';
 
+/// Returns the value if it's not null or empty, otherwise returns the default value.
 T valueOrDefault<T>(T? value, T defaultValue) =>
     (value is String && value.isEmpty) || value == null ? defaultValue : value;
 
+/// Formats a DateTime object according to the specified format and locale.
 String dateTimeFormat(String format, DateTime? dateTime, {String? locale}) {
   if (dateTime == null) {
     return '';
@@ -41,6 +43,7 @@ String dateTimeFormat(String format, DateTime? dateTime, {String? locale}) {
   return DateFormat(format, locale).format(dateTime);
 }
 
+/// Launches a URL in the default browser.
 Future launchURL(String url) async {
   var uri = Uri.parse(url);
   try {
@@ -50,6 +53,7 @@ Future launchURL(String url) async {
   }
 }
 
+/// Converts a CSS color string to a Color object.
 Color colorFromCssString(String color, {Color? defaultColor}) {
   try {
     return fromCssColor(color);
@@ -57,6 +61,7 @@ Color colorFromCssString(String color, {Color? defaultColor}) {
   return defaultColor ?? Colors.black;
 }
 
+/// Enum for different number formatting types.
 enum FormatType {
   decimal,
   percent,
@@ -66,12 +71,14 @@ enum FormatType {
   custom,
 }
 
+/// Enum for decimal separator types.
 enum DecimalType {
   automatic,
   periodDecimal,
   commaDecimal,
 }
 
+/// Formats a number according to the specified format type and options.
 String formatNumber(
   num? value, {
   required FormatType formatType,
@@ -142,15 +149,20 @@ String formatNumber(
   return formattedValue;
 }
 
+/// Returns the current timestamp.
 DateTime get getCurrentTimestamp => DateTime.now();
+
+/// Converts seconds since epoch to DateTime.
 DateTime dateTimeFromSecondsSinceEpoch(int seconds) {
   return DateTime.fromMillisecondsSinceEpoch(seconds * 1000);
 }
 
+/// Extension to convert DateTime to seconds since epoch.
 extension DateTimeConversionExtension on DateTime {
   int get secondsSinceEpoch => (millisecondsSinceEpoch / 1000).round();
 }
 
+/// Extension to add comparison operators to DateTime.
 extension DateTimeComparisonOperators on DateTime {
   bool operator <(DateTime other) => isBefore(other);
   bool operator >(DateTime other) => isAfter(other);
@@ -158,6 +170,7 @@ extension DateTimeComparisonOperators on DateTime {
   bool operator >=(DateTime other) => this > other || isAtSameMomentAs(other);
 }
 
+/// Casts a dynamic value to the specified type T.
 T? castToType<T>(dynamic value) {
   if (value == null) {
     return null;
@@ -179,6 +192,7 @@ T? castToType<T>(dynamic value) {
   return value as T;
 }
 
+/// Retrieves a value from a JSON response using a JSON path.
 dynamic getJsonField(
   dynamic response,
   String jsonPath, [
@@ -200,6 +214,7 @@ dynamic getJsonField(
   return value;
 }
 
+/// Gets the bounding box of a widget.
 Rect? getWidgetBoundingBox(BuildContext context) {
   try {
     final renderBox = context.findRenderObject() as RenderBox?;
@@ -209,15 +224,21 @@ Rect? getWidgetBoundingBox(BuildContext context) {
   }
 }
 
+/// Platform checks
 bool get isAndroid => !kIsWeb && Platform.isAndroid;
 bool get isiOS => !kIsWeb && Platform.isIOS;
 bool get isWeb => kIsWeb;
 
+/// Breakpoint constants
 const kBreakpointSmall = 479.0;
 const kBreakpointMedium = 767.0;
 const kBreakpointLarge = 991.0;
+
+/// Checks if the current width is considered mobile.
 bool isMobileWidth(BuildContext context) =>
     MediaQuery.sizeOf(context).width < kBreakpointSmall;
+
+/// Determines visibility based on screen size.
 bool responsiveVisibility({
   required BuildContext context,
   bool phone = true,
@@ -237,18 +258,20 @@ bool responsiveVisibility({
   }
 }
 
+/// Regular expressions for various text validations
 const kTextValidatorUsernameRegex = r'^[a-zA-Z][a-zA-Z0-9_-]{2,16}$';
-// https://stackoverflow.com/a/201378
 const kTextValidatorEmailRegex =
     "^(?:[a-zA-Z0-9!#\$%&\'*+/=?^_`{|}~-]+(?:\\.[a-zA-Z0-9!#\$%&\'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?\\.)+[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?|\\[(?:(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9]))\\.){3}(?:(2(5[0-5]|[0-4][0-9])|1[0-9][0-9]|[1-9]?[0-9])|[a-zA-Z0-9-]*[a-zA-Z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])\$";
 const kTextValidatorWebsiteRegex =
     r'(https?:\/\/)?(www\.)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,10}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)|(https?:\/\/)?(www\.)?(?!ww)[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,10}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)';
 
+/// Extension for TextEditingController to handle null cases
 extension FFTextEditingControllerExt on TextEditingController? {
   String get text => this == null ? '' : this!.text;
   set text(String newText) => this?.text = newText;
 }
 
+/// Extension for Iterable to add sorting functionality
 extension IterableExt<T> on Iterable<T> {
   List<T> sortedList<S extends Comparable>(
       {S Function(T)? keyOf, bool desc = false}) {
@@ -267,13 +290,16 @@ extension IterableExt<T> on Iterable<T> {
       .toList();
 }
 
+/// Extension to convert a string to a DocumentReference
 extension StringDocRef on String {
   DocumentReference get ref => FirebaseFirestore.instance.doc(this);
 }
 
+/// Sets the dark mode setting for the app
 void setDarkModeSetting(BuildContext context, ThemeMode themeMode) =>
     MyApp.of(context).setThemeMode(themeMode);
 
+/// Shows a snackbar with an optional loading indicator
 void showSnackbar(
   BuildContext context,
   String message, {
@@ -304,6 +330,7 @@ void showSnackbar(
   );
 }
 
+/// Extension for String to handle overflow
 extension FFStringExt on String {
   String maybeHandleOverflow({int? maxChars, String replacement = ''}) =>
       maxChars != null && length > maxChars
@@ -311,10 +338,12 @@ extension FFStringExt on String {
           : this;
 }
 
+/// Extension to filter out null values from a list
 extension ListFilterExt<T> on Iterable<T?> {
   List<T> get withoutNulls => where((s) => s != null).map((e) => e!).toList();
 }
 
+/// Extension to filter out null values from a map
 extension MapFilterExtensions<T> on Map<String, T?> {
   Map<String, T> get withoutNulls => Map.fromEntries(
         entries
@@ -323,12 +352,14 @@ extension MapFilterExtensions<T> on Map<String, T?> {
       );
 }
 
+/// Extension to check if a list contains a map
 extension MapListContainsExt on List<dynamic> {
   bool containsMap(dynamic map) => map is Map
       ? any((e) => e is Map && const DeepCollectionEquality().equals(e, map))
       : contains(map);
 }
 
+/// Extension to add dividers and padding to a list of widgets
 extension ListDivideExt<T extends Widget> on Iterable<T> {
   Iterable<MapEntry<int, Widget>> get enumerate => toList().asMap().entries;
 
@@ -353,8 +384,9 @@ extension ListDivideExt<T extends Widget> on Iterable<T> {
           .toList();
 }
 
+/// Extension for StatefulWidget to safely set state
 extension StatefulWidgetExtensions on State<StatefulWidget> {
-  /// Check if the widget exist before safely setting state.
+  /// Check if the widget exists before safely setting state.
   void safeSetState(VoidCallback fn) {
     if (mounted) {
       // ignore: invalid_use_of_protected_member
@@ -363,8 +395,7 @@ extension StatefulWidgetExtensions on State<StatefulWidget> {
   }
 }
 
-// For iOS 16 and below, set the status bar color to match the app's theme.
-// https://github.com/flutter/flutter/issues/41067
+/// Fixes the status bar color on iOS 16 and below
 Brightness? _lastBrightness;
 void fixStatusBarOniOS16AndBelow(BuildContext context) {
   if (!isiOS) {
@@ -382,6 +413,7 @@ void fixStatusBarOniOS16AndBelow(BuildContext context) {
   }
 }
 
+/// Extension to get unique elements from a list based on a key
 extension ListUniqueExt<T> on Iterable<T> {
   List<T> unique(dynamic Function(T) getKey) {
     var distinctSet = <dynamic>{};
@@ -395,11 +427,13 @@ extension ListUniqueExt<T> on Iterable<T> {
   }
 }
 
+/// Rounds a double to a specified number of decimal points
 String roundTo(double value, int decimalPoints) {
   final power = pow(10, decimalPoints);
   return ((value * power).round() / power).toString();
 }
 
+/// Computes the X alignment for a gradient based on an angle
 double computeGradientAlignmentX(double evaluatedAngle) {
   evaluatedAngle %= 360;
   final rads = evaluatedAngle * pi / 180;
@@ -416,6 +450,7 @@ double computeGradientAlignmentX(double evaluatedAngle) {
   return double.parse(roundTo(x, 2));
 }
 
+/// Computes the Y alignment for a gradient based on an angle
 double computeGradientAlignmentY(double evaluatedAngle) {
   evaluatedAngle %= 360;
   final rads = evaluatedAngle * pi / 180;

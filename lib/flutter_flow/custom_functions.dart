@@ -14,6 +14,85 @@ import '/backend/schema/structs/index.dart';
 import '/backend/schema/enums/enums.dart';
 import '/auth/firebase_auth/auth_util.dart';
 
+/// Generates a prompt for the AI assistant based on user inputs.
+///
+/// This function takes several optional parameters related to cooking and
+/// dietary preferences and returns a formatted string that serves as a prompt
+/// for generating recipe ideas.
+///
+/// Parameters:
+/// - [prepTime]: The preparation time in minutes. Defaults to "20" if not provided.
+/// - [cookTime]: The cooking time in minutes. Defaults to "20" if not provided.
+/// - [otherIngredients]: Additional ingredients specified by the user. Defaults to "None".
+/// - [foodPref]: The user's food preferences. Defaults to "everything".
+/// - [foodAllergy]: Any food allergies the user has. Defaults to "nothing".
+/// - [fitnessGoal]: The user's fitness goal. Defaults to "being healthy".
+///
+/// Returns:
+/// A string that combines system messages, user requirements, and preferences
+/// into a prompt for the AI assistant.
+String getPrompt(
+  String? prepTime,
+  String? cookTime,
+  String? otherIngredients,
+  String? foodPref,
+  String? foodAllergy,
+  String? fitnessGoal,
+) {
+  // Check if the prepTime is empty and assign a default value if necessary.
+  prepTime = prepTime!.isEmpty ? "20" : prepTime;
+  cookTime = cookTime!.isEmpty ? "20" : cookTime;
+  otherIngredients = otherIngredients!.isEmpty ? "None" : otherIngredients;
+  foodPref = foodPref!.isEmpty ? "everything" : foodPref;
+  foodAllergy = foodAllergy!.isEmpty ? "nothing" : foodAllergy;
+  fitnessGoal = fitnessGoal!.isEmpty ? "being healthy" : fitnessGoal;
+
+  // System message
+  String sysMsg =
+      ''' You're an AI assistant good at generating recipe ideas with calorie information. 
+      You'll give a recipe idea based on the ingredients in the given photo. Please consider user requirements. 
+      Output in this format:''';
+
+  // Primary content / Instruction
+  String getIngredients =
+      "Provide 3 key ingredients and their weights in gram.";
+  String getSteps =
+      "Provide 3 key steps for preparing this dish. Each step in a new line with number of the step.";
+
+  // Supporting content: input from ingredients page, user preferences
+  String userRequirements =
+      "User requirements: Cooking time: $cookTime minutes; preparation time: $prepTime minutes; other ingredients: $otherIngredients.";
+  String userPreferences =
+      "User's fitness goal is $fitnessGoal, is allergic to $foodAllergy, prefers $foodPref.";
+
+  // Cue: generate in json, log success or not, log error message if any
+  String cue =
+      "If you cannot analyze the photo or provided ingredients, log false in the isSuccess field and provide error message in the errorMsg field.";
+  String format = '''
+      {
+      "name": "Example Dish",
+      "carbs": 25.5,
+      "fats": 10.3,
+      "proteins": 15.8,
+      "ingredients": "ingredient1 150g, ingredient2 200g, ingredient3 10g",
+      "steps": "Step 1: Do this. Step 2: Do that.",
+      "isSuccess": true,
+      "errorMsg": ""
+    }
+  ''';
+
+  // Combine instructions
+  String output = sysMsg +
+      format +
+      cue +
+      getIngredients +
+      getSteps +
+      userRequirements +
+      userPreferences;
+
+  return output;
+}
+
 double caloriesCalculation(
   String carbs,
   String protein,
@@ -315,68 +394,6 @@ List<double> getWeeklyCalories(List<MealTrackingRecord>? mealData) {
   return weeklyCalories;
 }
 
-String getPrompt(
-  String? prepTime,
-  String? cookTime,
-  String? otherIngredients,
-  String? foodPref,
-  String? foodAllergy,
-  String? fitnessGoal,
-) {
-  // Give input variables default value if they don't have data
-  prepTime = prepTime!.isEmpty ? "20" : prepTime;
-  cookTime = cookTime!.isEmpty ? "20" : cookTime;
-  otherIngredients = otherIngredients!.isEmpty ? "None" : otherIngredients;
-  foodPref = foodPref!.isEmpty ? "everything" : foodPref;
-  foodAllergy = foodAllergy!.isEmpty ? "nothing" : foodAllergy;
-  fitnessGoal = fitnessGoal!.isEmpty ? "being healthy" : fitnessGoal;
-
-  // System message
-  String sysMsg =
-      ''' You're an AI assistant good at generating recipe ideas with calorie information. 
-      You'll give a recipe idea based on the ingredients in the given photo. Please consider user requirements. 
-      Output in this format:''';
-
-  // Primary content / Instruction
-  String getIngredients =
-      "Provide 3 key ingredients and their weights in gram.";
-  String getSteps =
-      "Provide 3 key steps for preparing this dish. Each step in a new line with number of the step.";
-
-  // Supporting content: input from ingredients page, user preferences
-  String userRequirements =
-      "User requirements: Cooking time: $cookTime minutes; preparation time: $prepTime minutes; other ingredients: $otherIngredients.";
-  String userPreferences =
-      "User's fitness goal is $fitnessGoal, is allergic to $foodAllergy, prefers $foodPref.";
-
-  // Cue: generate in json, log success or not, log error message if any
-  String cue =
-      "If you cannot analyze the photo or provided ingredients, log false in the isSuccess field and provide error message in the errorMsg field.";
-  String format = '''
-      {
-      "name": "Example Dish",
-      "carbs": 25.5,
-      "fats": 10.3,
-      "proteins": 15.8,
-      "ingredients": "ingredient1 150g, ingredient2 200g, ingredient3 10g",
-      "steps": "Step 1: Do this. Step 2: Do that.",
-      "isSuccess": true,
-      "errorMsg": ""
-    }
-  ''';
-
-  // Combine instructions
-  String output = sysMsg +
-      format +
-      cue +
-      getIngredients +
-      getSteps +
-      userRequirements +
-      userPreferences;
-
-  return output;
-}
-
 RecipeDTStruct genRecipeVar(String? input) {
   // Returm empty RecipeDT with false indicator
   if (input == null || input.isEmpty) {
@@ -426,3 +443,4 @@ RecipeDTStruct genRecipeVar(String? input) {
     );
   }
 }
+

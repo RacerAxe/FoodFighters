@@ -4,9 +4,11 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+// Export necessary classes from fl_chart for easier access
 export 'package:fl_chart/fl_chart.dart'
     show BarAreaData, FlDotData, LineChartBarData, BarChartAlignment;
 
+/// A widget that displays a line chart using the fl_chart package.
 class FlutterFlowLineChart extends StatelessWidget {
   const FlutterFlowLineChart({
     super.key,
@@ -23,6 +25,7 @@ class FlutterFlowLineChart extends StatelessWidget {
   final AxisBounds axisBounds;
   final ChartStylingInfo chartStylingInfo;
 
+  /// Converts the chart data into a list of LineChartBarData with spots.
   List<LineChartBarData> get dataWithSpots =>
       data.map((d) => d.settings.copyWith(spots: d.spots)).toList();
 
@@ -58,6 +61,7 @@ class FlutterFlowLineChart extends StatelessWidget {
       );
 }
 
+/// A widget that displays a bar chart using the fl_chart package.
 class FlutterFlowBarChart extends StatelessWidget {
   const FlutterFlowBarChart({
     super.key,
@@ -88,9 +92,11 @@ class FlutterFlowBarChart extends StatelessWidget {
   final BarChartAlignment alignment;
   final ChartStylingInfo chartStylingInfo;
 
+  /// Converts the bar data into a map of x-axis positions to lists of y-values.
   Map<int, List<double>> get dataMap => xLabels.asMap().map((key, value) =>
       MapEntry(key, barData.map((data) => data.data[key]).toList()));
 
+  /// Generates the group data for non-stacked bar charts.
   List<BarChartGroupData> get groups => dataMap.entries.map((entry) {
         final groupInt = entry.key;
         final groupData = entry.value;
@@ -114,6 +120,7 @@ class FlutterFlowBarChart extends StatelessWidget {
             }).toList());
       }).toList();
 
+  /// Generates the group data for stacked bar charts.
   List<BarChartGroupData> get stacks => dataMap.entries.map((entry) {
         final groupInt = entry.key;
         final stackData = entry.value;
@@ -145,6 +152,7 @@ class FlutterFlowBarChart extends StatelessWidget {
         );
       }).toList();
 
+  /// Calculates the sum of a list of doubles.
   double sum(List<double> list) => list.reduce((a, b) => a + b);
 
   @override
@@ -185,12 +193,14 @@ class FlutterFlowBarChart extends StatelessWidget {
   }
 }
 
+/// Enum to define the type of label to display on pie chart sections.
 enum PieChartSectionLabelType {
   none,
   value,
   percent,
 }
 
+/// A widget that displays a pie chart using the fl_chart package.
 class FlutterFlowPieChart extends StatelessWidget {
   const FlutterFlowPieChart({
     super.key,
@@ -209,6 +219,7 @@ class FlutterFlowPieChart extends StatelessWidget {
   final TextStyle? sectionLabelStyle;
   final LabelFormatter labelFormatter;
 
+  /// Calculates the sum of all values in the pie chart.
   double get sumOfValues => data.data.reduce((a, b) => a + b);
 
   @override
@@ -261,6 +272,7 @@ class FlutterFlowPieChart extends StatelessWidget {
       );
 }
 
+/// A widget that displays a legend for charts.
 class FlutterFlowChartLegendWidget extends StatelessWidget {
   const FlutterFlowChartLegendWidget({
     super.key,
@@ -332,6 +344,10 @@ class FlutterFlowChartLegendWidget extends StatelessWidget {
       );
 }
 
+/// Represents a legend entry in a chart.
+///
+/// This class holds the color and name of a legend entry, which is used
+/// to describe a particular data series in a chart.
 class LegendEntry {
   const LegendEntry(this.color, this.name);
 
@@ -339,6 +355,7 @@ class LegendEntry {
   final String name;
 }
 
+/// Contains styling information for charts.
 class ChartStylingInfo {
   const ChartStylingInfo({
     this.backgroundColor = Colors.white,
@@ -359,6 +376,7 @@ class ChartStylingInfo {
   final bool showBorder;
 }
 
+/// Contains information for axis labels.
 class AxisLabelInfo {
   const AxisLabelInfo({
     this.title = '',
@@ -379,6 +397,7 @@ class AxisLabelInfo {
   final double? reservedSize;
 }
 
+/// Provides formatting options for labels.
 class LabelFormatter {
   const LabelFormatter({
     this.numberFormat,
@@ -388,6 +407,7 @@ class LabelFormatter {
   NumberFormat get defaultFormat => NumberFormat()..significantDigits = 2;
 }
 
+/// Defines the bounds for chart axes.
 class AxisBounds {
   const AxisBounds({this.minX, this.minY, this.maxX, this.maxY});
 
@@ -397,6 +417,7 @@ class AxisBounds {
   final double? maxY;
 }
 
+/// Represents data for a line chart.
 class FFLineChartData {
   const FFLineChartData({
     required this.xData,
@@ -408,6 +429,7 @@ class FFLineChartData {
   final List<dynamic> yData;
   final LineChartBarData settings;
 
+  /// Converts x and y data into a list of FlSpot objects.
   List<FlSpot> get spots {
     final x = _dataToDouble(xData);
     final y = _dataToDouble(yData);
@@ -420,6 +442,7 @@ class FFLineChartData {
   }
 }
 
+/// Represents data for a bar chart.
 class FFBarChartData {
   const FFBarChartData({
     required this.yData,
@@ -433,9 +456,11 @@ class FFBarChartData {
   final double borderWidth;
   final Color borderColor;
 
+  /// Converts y-axis data to a list of doubles.
   List<double> get data => _dataToDouble(yData).map((e) => e ?? 0.0).toList();
 }
 
+/// Represents data for a pie chart.
 class FFPieChartData {
   const FFPieChartData({
     required this.values,
@@ -451,9 +476,11 @@ class FFPieChartData {
   final List<double>? borderWidth;
   final List<Color>? borderColor;
 
+  /// Converts pie chart data to a list of doubles.
   List<double> get data => _dataToDouble(values).map((e) => e ?? 0.0).toList();
 }
 
+/// Converts a list of dynamic data to a list of nullable doubles.
 List<double?> _dataToDouble(List<dynamic> data) {
   if (data.isEmpty) {
     return [];
@@ -487,6 +514,7 @@ List<double?> _dataToDouble(List<dynamic> data) {
   return [];
 }
 
+/// Generates FlTitlesData for chart axes.
 FlTitlesData getTitlesData(
   AxisLabelInfo xAxisLabelInfo,
   AxisLabelInfo yAxisLabelInfo, {
@@ -539,9 +567,11 @@ FlTitlesData getTitlesData(
       ),
     );
 
+/// Formats a label using the provided formatter or default format.
 String formatLabel(LabelFormatter formatter, double value) {
   if (formatter.numberFormat != null) {
     return formatter.numberFormat!(value);
   }
   return formatter.defaultFormat.format(value);
 }
+

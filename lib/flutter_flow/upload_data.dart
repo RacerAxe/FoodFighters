@@ -12,8 +12,10 @@ import '../auth/firebase_auth/auth_util.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import 'flutter_flow_util.dart';
 
+/// Defines the allowed file formats for media uploads.
 const allowedFormats = {'image/png', 'image/jpeg', 'video/mp4', 'image/gif'};
 
+/// Represents a file selected for upload.
 class SelectedFile {
   const SelectedFile({
     this.storagePath = '',
@@ -22,6 +24,7 @@ class SelectedFile {
     this.dimensions,
     this.blurHash,
   });
+  
   final String storagePath;
   final String? filePath;
   final Uint8List bytes;
@@ -29,21 +32,25 @@ class SelectedFile {
   final String? blurHash;
 }
 
+/// Represents the dimensions of a media file.
 class MediaDimensions {
   const MediaDimensions({
     this.height,
     this.width,
   });
+  
   final double? height;
   final double? width;
 }
 
+/// Enumerates the possible sources for media selection.
 enum MediaSource {
   photoGallery,
   videoGallery,
   camera,
 }
 
+/// Displays a bottom sheet for selecting media source and returns the selected files.
 Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
   required BuildContext context,
   String? storageFolderPath,
@@ -58,83 +65,91 @@ Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
   bool includeDimensions = false,
   bool includeBlurHash = false,
 }) async {
+  // Helper function to create a list tile for media source selection
   createUploadMediaListTile(String label, MediaSource mediaSource) => ListTile(
-            title: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.getFont(
-                pickerFontFamily,
-                color: textColor,
-                fontWeight: FontWeight.w600,
-                fontSize: 20,
-              ),
-            ),
-            tileColor: backgroundColor,
-            dense: false,
-            onTap: () => Navigator.pop(
-              context,
-              mediaSource,
-            ),
-          );
+        title: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: GoogleFonts.getFont(
+            pickerFontFamily,
+            color: textColor,
+            fontWeight: FontWeight.w600,
+            fontSize: 20,
+          ),
+        ),
+        tileColor: backgroundColor,
+        dense: false,
+        onTap: () => Navigator.pop(
+          context,
+          mediaSource,
+        ),
+      );
+
+  // Show the bottom sheet and wait for user selection
   final mediaSource = await showModalBottomSheet<MediaSource>(
-      context: context,
-      backgroundColor: backgroundColor,
-      builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (!kIsWeb) ...[
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
-                child: ListTile(
-                  title: Text(
-                    'Choose Source',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.getFont(
-                      pickerFontFamily,
-                      color: textColor.withOpacity(0.65),
-                      fontWeight: FontWeight.w500,
-                      fontSize: 20,
-                    ),
+    context: context,
+    backgroundColor: backgroundColor,
+    builder: (context) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (!kIsWeb) ...[
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 8, 0, 0),
+              child: ListTile(
+                title: Text(
+                  'Choose Source',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.getFont(
+                    pickerFontFamily,
+                    color: textColor.withOpacity(0.65),
+                    fontWeight: FontWeight.w500,
+                    fontSize: 20,
                   ),
-                  tileColor: backgroundColor,
-                  dense: false,
                 ),
+                tileColor: backgroundColor,
+                dense: false,
               ),
-              const Divider(),
-            ],
-            if (allowPhoto && allowVideo) ...[
-              createUploadMediaListTile(
-                'Gallery (Photo)',
-                MediaSource.photoGallery,
-              ),
-              const Divider(),
-              createUploadMediaListTile(
-                'Gallery (Video)',
-                MediaSource.videoGallery,
-              ),
-            ] else if (allowPhoto)
-              createUploadMediaListTile(
-                'Gallery',
-                MediaSource.photoGallery,
-              )
-            else
-              createUploadMediaListTile(
-                'Gallery',
-                MediaSource.videoGallery,
-              ),
-            if (!kIsWeb) ...[
-              const Divider(),
-              createUploadMediaListTile('Camera', MediaSource.camera),
-              const Divider(),
-            ],
-            const SizedBox(height: 10),
+            ),
+            const Divider(),
           ],
-        );
-      });
+          if (allowPhoto && allowVideo) ...[
+            createUploadMediaListTile(
+              'Gallery (Photo)',
+              MediaSource.photoGallery,
+            ),
+            const Divider(),
+            createUploadMediaListTile(
+              'Gallery (Video)',
+              MediaSource.videoGallery,
+            ),
+          ] else if (allowPhoto)
+            createUploadMediaListTile(
+              'Gallery',
+              MediaSource.photoGallery,
+            )
+          else
+            createUploadMediaListTile(
+              'Gallery',
+              MediaSource.videoGallery,
+            ),
+          if (!kIsWeb) ...[
+            const Divider(),
+            createUploadMediaListTile('Camera', MediaSource.camera),
+            const Divider(),
+          ],
+          const SizedBox(height: 10),
+        ],
+      );
+    },
+  );
+
+  // Return null if no media source was selected
   if (mediaSource == null) {
     return null;
   }
+
+  // Select media based on the chosen source
   return selectMedia(
     storageFolderPath: storageFolderPath,
     maxWidth: maxWidth,
@@ -148,6 +163,7 @@ Future<List<SelectedFile>?> selectMediaWithSourceBottomSheet({
   );
 }
 
+/// Selects media (image or video) from the specified source.
 Future<List<SelectedFile>?> selectMedia({
   String? storageFolderPath,
   double? maxWidth,
@@ -224,6 +240,7 @@ Future<List<SelectedFile>?> selectMedia({
   ];
 }
 
+/// Validates the file format against the allowed formats.
 bool validateFileFormat(String filePath, BuildContext context) {
   if (allowedFormats.contains(mime(filePath))) {
     return true;
@@ -236,6 +253,7 @@ bool validateFileFormat(String filePath, BuildContext context) {
   return false;
 }
 
+/// Selects a single file using FilePicker.
 Future<SelectedFile?> selectFile({
   String? storageFolderPath,
   List<String>? allowedExtensions,
@@ -246,6 +264,7 @@ Future<SelectedFile?> selectFile({
       multiFile: false,
     ).then((value) => value?.first);
 
+/// Selects multiple files using FilePicker.
 Future<List<SelectedFile>?> selectFiles({
   String? storageFolderPath,
   List<String>? allowedExtensions,
@@ -287,6 +306,7 @@ Future<List<SelectedFile>?> selectFiles({
   ];
 }
 
+/// Converts uploaded files to SelectedFile objects.
 List<SelectedFile> selectedFilesFromUploadedFiles(
   List<FFUploadedFile> uploadedFiles, {
   String? storageFolderPath,
@@ -307,6 +327,7 @@ List<SelectedFile> selectedFilesFromUploadedFiles(
       },
     ).toList();
 
+/// Retrieves the dimensions of an image from its bytes.
 Future<MediaDimensions> _getImageDimensions(Uint8List mediaBytes) async {
   final image = await decodeImageFromList(mediaBytes);
   return MediaDimensions(
@@ -315,6 +336,7 @@ Future<MediaDimensions> _getImageDimensions(Uint8List mediaBytes) async {
   );
 }
 
+/// Retrieves the dimensions of a video from its file path.
 Future<MediaDimensions> _getVideoDimensions(String path) async {
   final VideoPlayerController videoPlayerController =
       VideoPlayerController.asset(path);
@@ -323,6 +345,7 @@ Future<MediaDimensions> _getVideoDimensions(String path) async {
   return MediaDimensions(width: size.width, height: size.height);
 }
 
+/// Generates a storage path for the uploaded file.
 String _getStoragePath(
   String? pathPrefix,
   String filePath,
@@ -339,6 +362,7 @@ String _getStoragePath(
   return '$pathPrefix/$timestamp$indexStr.$ext';
 }
 
+/// Generates a storage path for a signature file.
 String getSignatureStoragePath([String? pathPrefix]) {
   pathPrefix ??= _firebasePathPrefix();
   pathPrefix = _removeTrailingSlash(pathPrefix);
@@ -346,6 +370,7 @@ String getSignatureStoragePath([String? pathPrefix]) {
   return '$pathPrefix/signature_$timestamp.png';
 }
 
+/// Displays an upload message as a snackbar.
 void showUploadMessage(
   BuildContext context,
   String message, {
@@ -375,8 +400,10 @@ void showUploadMessage(
     );
 }
 
+/// Removes the trailing slash from a path if present.
 String? _removeTrailingSlash(String? path) => path != null && path.endsWith('/')
     ? path.substring(0, path.length - 1)
     : path;
 
+/// Returns the Firebase storage path prefix for the current user.
 String _firebasePathPrefix() => 'users/$currentUserUid/uploads';

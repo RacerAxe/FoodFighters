@@ -1,3 +1,4 @@
+// Import necessary packages and modules
 import '/backend/backend.dart';
 import '/backend/gemini/gemini.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'enter_ingredients_model.dart';
 export 'enter_ingredients_model.dart';
 
+/// Widget for entering ingredients and generating recipe ideas
 class EnterIngredientsWidget extends StatefulWidget {
   const EnterIngredientsWidget({super.key});
 
@@ -28,6 +30,7 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
     super.initState();
     _model = createModel(context, () => EnterIngredientsModel());
 
+    // Initialize text controllers and focus nodes
     _model.prepTimeTextController ??= TextEditingController();
     _model.prepTimeFocusNode ??= FocusNode();
 
@@ -41,7 +44,6 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -52,7 +54,7 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
         singleRecord: true,
       ),
       builder: (context, snapshot) {
-        // Customize what your widget looks like when it's loading.
+        // Show loading indicator while data is being fetched
         if (!snapshot.hasData) {
           return Scaffold(
             backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
@@ -114,6 +116,7 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
                   mainAxisSize: MainAxisSize.max,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Title
                     Padding(
                       padding:
                           const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
@@ -133,6 +136,7 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
                       child: Column(
                         mainAxisSize: MainAxisSize.max,
                         children: [
+                          // Preparation time input
                           Row(
                             mainAxisSize: MainAxisSize.max,
                             children: [
@@ -236,6 +240,7 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
                               ),
                             ],
                           ),
+                          // Cooking time input
                           Row(
                             mainAxisSize: MainAxisSize.max,
                             children: [
@@ -335,6 +340,7 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
                               ),
                             ],
                           ),
+                          // Photo upload button
                           Padding(
                             padding: const EdgeInsetsDirectional.fromSTEB(
                                 0.0, 16.0, 0.0, 16.0),
@@ -441,6 +447,7 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
                               ),
                             ),
                           ),
+                          // Manual ingredient input
                           Align(
                             alignment: const AlignmentDirectional(-1.0, 0.0),
                             child: Padding(
@@ -524,12 +531,13 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
                         ].divide(const SizedBox(height: 12.0)),
                       ),
                     ),
+                    // Submit button
                     Padding(
                       padding:
                           const EdgeInsetsDirectional.fromSTEB(0.0, 24.0, 0.0, 12.0),
                       child: FFButtonWidget(
                         onPressed: () async {
-                          // Gemini - Get Recipe Idea
+                          // Generate recipe idea using Gemini AI
                           await geminiTextFromImage(
                             context,
                             functions.getPrompt(
@@ -548,7 +556,7 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
                           if (functions
                               .genRecipeVar(_model.recipeDataStr)
                               .isSuccess) {
-                            // Get Recipe Image
+                            // Generate recipe image
                             _model.outputIMG = await actions.generateImage(
                               valueOrDefault<String>(
                                 functions
@@ -557,8 +565,7 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
                                 'a delicious dish',
                               ),
                             );
-                            // Go To Recipe Page
-
+                            // Navigate to Recipe page
                             context.pushNamed(
                               'Recipe',
                               queryParameters: {
@@ -596,6 +603,7 @@ class _EnterIngredientsWidgetState extends State<EnterIngredientsWidget> {
                               },
                             );
                           } else {
+                            // Show error message if no ingredients found
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(

@@ -16,14 +16,12 @@ import 'github_auth.dart';
 
 export '../base_auth_user_provider.dart';
 
+/// Manages phone authentication state and notifications.
 class FirebasePhoneAuthManager extends ChangeNotifier {
   bool? _triggerOnCodeSent;
   FirebaseAuthException? phoneAuthError;
-  // Set when using phone verification (after phone number is provided).
   String? phoneAuthVerificationCode;
-  // Set when using phone sign in in web mode (ignored otherwise).
   ConfirmationResult? webPhoneAuthConfirmationResult;
-  // Used for handling verification codes for phone sign in.
   void Function(BuildContext)? _onCodeSent;
 
   bool get triggerOnCodeSent => _triggerOnCodeSent ?? false;
@@ -33,12 +31,14 @@ class FirebasePhoneAuthManager extends ChangeNotifier {
       _onCodeSent == null ? (_) {} : _onCodeSent!;
   set onCodeSent(void Function(BuildContext) func) => _onCodeSent = func;
 
+  /// Updates the manager's state and notifies listeners.
   void update(VoidCallback callback) {
     callback();
     notifyListeners();
   }
 }
 
+/// Manages various authentication methods for Firebase.
 class FirebaseAuthManager extends AuthManager
     with
         EmailSignInManager,
@@ -48,17 +48,17 @@ class FirebaseAuthManager extends AuthManager
         JwtSignInManager,
         GithubSignInManager,
         PhoneSignInManager {
-  // Set when using phone verification (after phone number is provided).
   String? _phoneAuthVerificationCode;
-  // Set when using phone sign in in web mode (ignored otherwise).
   ConfirmationResult? _webPhoneAuthConfirmationResult;
   FirebasePhoneAuthManager phoneAuthManager = FirebasePhoneAuthManager();
 
+  /// Signs out the current user.
   @override
   Future signOut() {
     return FirebaseAuth.instance.signOut();
   }
 
+  /// Deletes the current user's account.
   @override
   Future deleteUser(BuildContext context) async {
     try {
@@ -79,6 +79,7 @@ class FirebaseAuthManager extends AuthManager
     }
   }
 
+  /// Updates the email address of the current user.
   @override
   Future updateEmail({
     required String email,
@@ -103,6 +104,7 @@ class FirebaseAuthManager extends AuthManager
     }
   }
 
+  /// Sends a password reset email to the specified email address.
   @override
   Future resetPassword({
     required String email,
@@ -122,6 +124,7 @@ class FirebaseAuthManager extends AuthManager
     );
   }
 
+  /// Signs in a user with email and password.
   @override
   Future<BaseAuthUser?> signInWithEmail(
     BuildContext context,
@@ -134,6 +137,7 @@ class FirebaseAuthManager extends AuthManager
         'EMAIL',
       );
 
+  /// Creates a new account with email and password.
   @override
   Future<BaseAuthUser?> createAccountWithEmail(
     BuildContext context,
@@ -146,24 +150,29 @@ class FirebaseAuthManager extends AuthManager
         'EMAIL',
       );
 
+  /// Signs in anonymously.
   @override
   Future<BaseAuthUser?> signInAnonymously(
     BuildContext context,
   ) =>
       _signInOrCreateAccount(context, anonymousSignInFunc, 'ANONYMOUS');
 
+  /// Signs in with Apple.
   @override
   Future<BaseAuthUser?> signInWithApple(BuildContext context) =>
       _signInOrCreateAccount(context, appleSignIn, 'APPLE');
 
+  /// Signs in with Google.
   @override
   Future<BaseAuthUser?> signInWithGoogle(BuildContext context) =>
       _signInOrCreateAccount(context, googleSignInFunc, 'GOOGLE');
 
+  /// Signs in with GitHub.
   @override
   Future<BaseAuthUser?> signInWithGithub(BuildContext context) =>
       _signInOrCreateAccount(context, githubSignInFunc, 'GITHUB');
 
+  /// Signs in with a JWT token.
   @override
   Future<BaseAuthUser?> signInWithJwtToken(
     BuildContext context,
@@ -171,6 +180,7 @@ class FirebaseAuthManager extends AuthManager
   ) =>
       _signInOrCreateAccount(context, () => jwtTokenSignIn(jwtToken), 'JWT');
 
+  /// Handles phone authentication state changes.
   void handlePhoneAuthStateChanges(BuildContext context) {
     phoneAuthManager.addListener(() {
       if (!context.mounted) {
@@ -191,6 +201,7 @@ class FirebaseAuthManager extends AuthManager
     });
   }
 
+  /// Initiates phone authentication process.
   @override
   Future beginPhoneAuth({
     required BuildContext context,
@@ -205,28 +216,15 @@ class FirebaseAuthManager extends AuthManager
       return;
     }
     final completer = Completer<bool>();
-    // If you'd like auto-verification, without the user having to enter the SMS
-    // code manually. Follow these instructions:
-    // * For Android: https://firebase.google.com/docs/auth/android/phone-auth?authuser=0#enable-app-verification (SafetyNet set up)
-    // * For iOS: https://firebase.google.com/docs/auth/ios/phone-auth?authuser=0#start-receiving-silent-notifications
-    // * Finally modify verificationCompleted below as instructed.
     await FirebaseAuth.instance.verifyPhoneNumber(
       phoneNumber: phoneNumber,
-      timeout:
-          const Duration(seconds: 0), // Skips Android's default auto-verification
+      timeout: const Duration(seconds: 0),
       verificationCompleted: (phoneAuthCredential) async {
         await FirebaseAuth.instance.signInWithCredential(phoneAuthCredential);
         phoneAuthManager.update(() {
           phoneAuthManager.triggerOnCodeSent = false;
           phoneAuthManager.phoneAuthError = null;
         });
-        // If you've implemented auto-verification, navigate to home page or
-        // onboarding page here manually. Uncomment the lines below and replace
-        // DestinationPage() with the desired widget.
-        // await Navigator.push(
-        //   context,
-        //   MaterialPageRoute(builder: (_) => DestinationPage()),
-        // );
       },
       verificationFailed: (e) {
         phoneAuthManager.update(() {
@@ -249,6 +247,7 @@ class FirebaseAuthManager extends AuthManager
     return completer.future;
   }
 
+  /// Verifies the SMS code for phone authentication.
   @override
   Future verifySmsCode({
     required BuildContext context,
@@ -273,7 +272,7 @@ class FirebaseAuthManager extends AuthManager
     }
   }
 
-  /// Tries to sign in or create an account using Firebase Auth.
+  /// Attempts to sign in or create an account using Firebase Auth.
   /// Returns the User object if sign in was successful.
   Future<BaseAuthUser?> _signInOrCreateAccount(
     BuildContext context,

@@ -3,6 +3,10 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'form_field_controller.dart';
 import 'package:flutter/material.dart';
 
+/// A customizable dropdown widget for Flutter Flow applications.
+///
+/// This widget provides a flexible dropdown menu with various customization options,
+/// including single and multi-select functionality, searchable options, and custom styling.
 class FlutterFlowDropDown<T> extends StatefulWidget {
   const FlutterFlowDropDown({
     super.key,
@@ -48,14 +52,19 @@ class FlutterFlowDropDown<T> extends StatefulWidget {
                   onMultiSelectChanged == null),
         );
 
+  // Controllers and callbacks
   final FormFieldController<T?>? controller;
   final FormFieldController<List<T>?>? multiSelectController;
+  final Function(T?)? onChanged;
+  final Function(List<T>?)? onMultiSelectChanged;
+
+  // Dropdown content
   final String? hintText;
   final String? searchHintText;
   final List<T> options;
   final List<String>? optionLabels;
-  final Function(T?)? onChanged;
-  final Function(List<T>?)? onMultiSelectChanged;
+
+  // Styling properties
   final Widget? icon;
   final double? width;
   final double? height;
@@ -74,8 +83,12 @@ class FlutterFlowDropDown<T> extends StatefulWidget {
   final bool disabled;
   final bool isOverButton;
   final Offset? menuOffset;
+
+  // Functionality flags
   final bool isSearchable;
   final bool isMultiSelect;
+
+  // Label properties
   final String? labelText;
   final TextStyle? labelTextStyle;
 
@@ -84,11 +97,13 @@ class FlutterFlowDropDown<T> extends StatefulWidget {
 }
 
 class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
+  // Getters for easier access to widget properties
   bool get isMultiSelect => widget.isMultiSelect;
   FormFieldController<T?> get controller => widget.controller!;
   FormFieldController<List<T>?> get multiSelectController =>
       widget.multiSelectController!;
 
+  // Helper getters for current value(s)
   T? get currentValue {
     final value = isMultiSelect
         ? multiSelectController.value?.firstOrNull
@@ -105,6 +120,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
         .intersection(multiSelectController.value!.toSet());
   }
 
+  // Map of options to their labels
   Map<T, String> get optionLabels => Map.fromEntries(
         widget.options.asMap().entries.map(
               (option) => MapEntry(
@@ -117,6 +133,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
             ),
       );
 
+  // Horizontal margin for the dropdown
   EdgeInsetsGeometry get horizontalMargin => widget.margin.clamp(
         EdgeInsetsDirectional.zero,
         const EdgeInsetsDirectional.symmetric(horizontal: double.infinity),
@@ -128,6 +145,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
   @override
   void initState() {
     super.initState();
+    // Set up listeners for value changes
     if (isMultiSelect) {
       _listener =
           () => widget.onMultiSelectChanged!(multiSelectController.value);
@@ -140,6 +158,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
 
   @override
   void dispose() {
+    // Remove listeners to prevent memory leaks
     if (isMultiSelect) {
       multiSelectController.removeListener(_listener);
     } else {
@@ -173,6 +192,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
     );
   }
 
+  // Determine whether to use DropdownButton2 or the legacy DropdownButton
   bool _useDropdown2() =>
       widget.isMultiSelect ||
       widget.isSearchable ||
@@ -182,6 +202,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
   Widget _buildDropdownWidget() =>
       _useDropdown2() ? _buildDropdown() : _buildLegacyDropdown();
 
+  // Build the legacy DropdownButton widget
   Widget _buildLegacyDropdown() {
     return DropdownButtonFormField<T>(
       value: currentValue,
@@ -205,10 +226,12 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
     );
   }
 
+  // Create hint text widget
   Text? _createHintText() => widget.hintText != null
       ? Text(widget.hintText!, style: widget.textStyle)
       : null;
 
+  // Create menu items for the dropdown
   List<DropdownMenuItem<T>> _createMenuItems() => widget.options
       .map(
         (option) => DropdownMenuItem<T>(
@@ -220,6 +243,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
       )
       .toList();
 
+  // Create menu items for multi-select dropdown
   List<DropdownMenuItem<T>> _createMultiselectMenuItems() => widget.options
       .map(
         (item) => DropdownMenuItem<T>(
@@ -267,6 +291,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
       )
       .toList();
 
+  // Build the DropdownButton2 widget
   Widget _buildDropdown() {
     final overlayColor = WidgetStateProperty.resolveWith<Color?>((states) =>
         states.contains(WidgetState.focused) ? Colors.transparent : null);
@@ -356,7 +381,7 @@ class _FlutterFlowDropDownState<T> extends State<FlutterFlowDropDown<T>> {
               },
             )
           : null,
-      // This is to clear the search value when you close the menu
+      // Clear the search value when the menu is closed
       onMenuStateChange: widget.isSearchable
           ? (isOpen) {
               if (!isOpen) {

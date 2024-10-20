@@ -1,3 +1,4 @@
+// Import necessary packages and files
 import '/auth/firebase_auth/auth_util.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'login_model.dart';
 export 'login_model.dart';
 
+/// LoginWidget is a StatefulWidget for the login screen
 class LoginWidget extends StatefulWidget {
   const LoginWidget({super.key});
 
@@ -28,6 +30,7 @@ class _LoginWidgetState extends State<LoginWidget> {
     super.initState();
     _model = createModel(context, () => LoginModel());
 
+    // Set up keyboard visibility listener for non-web platforms
     if (!isWeb) {
       _keyboardVisibilitySubscription =
           KeyboardVisibilityController().onChange.listen((bool visible) {
@@ -37,6 +40,7 @@ class _LoginWidgetState extends State<LoginWidget> {
       });
     }
 
+    // Initialize text controllers and focus nodes
     _model.emailFieldTextController ??= TextEditingController();
     _model.emailFieldFocusNode ??= FocusNode();
 
@@ -48,6 +52,7 @@ class _LoginWidgetState extends State<LoginWidget> {
   void dispose() {
     _model.dispose();
 
+    // Cancel keyboard visibility subscription for non-web platforms
     if (!isWeb) {
       _keyboardVisibilitySubscription.cancel();
     }
@@ -107,6 +112,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Title
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   12.0, 32.0, 0.0, 8.0),
@@ -121,11 +127,12 @@ class _LoginWidgetState extends State<LoginWidget> {
                                     ),
                               ),
                             ),
+                            // Subtitle
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   12.0, 0.0, 0.0, 12.0),
                               child: Text(
-                                'Access your wonderful recipes by loggin in below.',
+                                'Access your wonderful recipes by logging in below.',
                                 textAlign: TextAlign.start,
                                 style: FlutterFlowTheme.of(context)
                                     .labelLarge
@@ -135,6 +142,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                                     ),
                               ),
                             ),
+                            // Email input field
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   16.0, 12.0, 16.0, 0.0),
@@ -212,6 +220,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                                     .asValidator(context),
                               ),
                             ),
+                            // Password input field
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   16.0, 12.0, 16.0, 0.0),
@@ -305,6 +314,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                                     .asValidator(context),
                               ),
                             ),
+                            // Forgot Password button (visible when keyboard is not shown)
                             if (!(isWeb
                                 ? MediaQuery.viewInsetsOf(context).bottom > 0
                                 : _isKeyboardVisible))
@@ -347,6 +357,7 @@ class _LoginWidgetState extends State<LoginWidget> {
                       ),
                     ),
                   ),
+                  // Login button (visible when keyboard is not shown)
                   if (!(isWeb
                       ? MediaQuery.viewInsetsOf(context).bottom > 0
                       : _isKeyboardVisible))
@@ -368,7 +379,6 @@ class _LoginWidgetState extends State<LoginWidget> {
                           }
 
                           // Go To Homepage
-
                           context.pushNamedAuth('Home_Page', context.mounted);
                         },
                         text: 'Login',

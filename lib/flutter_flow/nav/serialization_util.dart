@@ -10,12 +10,15 @@ import '../../flutter_flow/uploaded_file.dart';
 
 /// SERIALIZATION HELPERS
 
+/// Converts a DateTimeRange to a string representation.
+/// Format: "startMilliseconds|endMilliseconds"
 String dateTimeRangeToString(DateTimeRange dateTimeRange) {
   final startStr = dateTimeRange.start.millisecondsSinceEpoch.toString();
   final endStr = dateTimeRange.end.millisecondsSinceEpoch.toString();
   return '$startStr|$endStr';
 }
 
+/// Converts an FFPlace object to a JSON string.
 String placeToString(FFPlace place) => jsonEncode({
       'latLng': place.latLng.serialize(),
       'name': place.name,
@@ -26,10 +29,14 @@ String placeToString(FFPlace place) => jsonEncode({
       'zipCode': place.zipCode,
     });
 
+/// Serializes an FFUploadedFile object.
 String uploadedFileToString(FFUploadedFile uploadedFile) =>
     uploadedFile.serialize();
 
+/// Delimiter used for separating document IDs in a reference path.
 const _kDocIdDelimeter = '|';
+
+/// Serializes a DocumentReference into a string of document IDs.
 String _serializeDocumentReference(DocumentReference ref) {
   final docIds = <String>[];
   DocumentReference? currentRef = ref;
@@ -42,6 +49,10 @@ String _serializeDocumentReference(DocumentReference ref) {
   return docIds.reversed.join(_kDocIdDelimeter);
 }
 
+/// Serializes a parameter based on its type.
+/// 
+/// This function handles various parameter types and converts them to string representations.
+/// It also supports serializing lists of parameters.
 String? serializeParam(
   dynamic param,
   ParamType paramType, {
@@ -62,39 +73,47 @@ String? serializeParam(
     String? data;
     switch (paramType) {
       case ParamType.int:
-        data = param.toString();
       case ParamType.double:
-        data = param.toString();
       case ParamType.String:
-        data = param;
+        data = param.toString();
+        break;
       case ParamType.bool:
         data = param ? 'true' : 'false';
+        break;
       case ParamType.DateTime:
         data = (param as DateTime).millisecondsSinceEpoch.toString();
+        break;
       case ParamType.DateTimeRange:
         data = dateTimeRangeToString(param as DateTimeRange);
+        break;
       case ParamType.LatLng:
         data = (param as LatLng).serialize();
+        break;
       case ParamType.Color:
         data = (param as Color).toCssString();
+        break;
       case ParamType.FFPlace:
         data = placeToString(param as FFPlace);
+        break;
       case ParamType.FFUploadedFile:
         data = uploadedFileToString(param as FFUploadedFile);
+        break;
       case ParamType.JSON:
         data = json.encode(param);
+        break;
       case ParamType.DocumentReference:
         data = _serializeDocumentReference(param as DocumentReference);
+        break;
       case ParamType.Document:
         final reference = (param as FirestoreRecord).reference;
         data = _serializeDocumentReference(reference);
-
+        break;
       case ParamType.DataStruct:
         data = param is BaseStruct ? param.serialize() : null;
-
+        break;
       case ParamType.Enum:
         data = (param is Enum) ? param.serialize() : null;
-
+        break;
       default:
         data = null;
     }
@@ -109,6 +128,7 @@ String? serializeParam(
 
 /// DESERIALIZATION HELPERS
 
+/// Converts a string representation back to a DateTimeRange object.
 DateTimeRange? dateTimeRangeFromString(String dateTimeRangeStr) {
   final pieces = dateTimeRangeStr.split('|');
   if (pieces.length != 2) {
@@ -120,6 +140,7 @@ DateTimeRange? dateTimeRangeFromString(String dateTimeRangeStr) {
   );
 }
 
+/// Converts a string representation back to a LatLng object.
 LatLng? latLngFromString(String? latLngStr) {
   final pieces = latLngStr?.split(',');
   if (pieces == null || pieces.length != 2) {
@@ -131,6 +152,7 @@ LatLng? latLngFromString(String? latLngStr) {
   );
 }
 
+/// Converts a JSON string back to an FFPlace object.
 FFPlace placeFromString(String placeStr) {
   final serializedData = jsonDecode(placeStr) as Map<String, dynamic>;
   final data = {
@@ -155,9 +177,11 @@ FFPlace placeFromString(String placeStr) {
   );
 }
 
+/// Deserializes a string back to an FFUploadedFile object.
 FFUploadedFile uploadedFileFromString(String uploadedFileStr) =>
     FFUploadedFile.deserialize(uploadedFileStr);
 
+/// Deserializes a string representation back to a DocumentReference.
 DocumentReference _deserializeDocumentReference(
   String refStr,
   List<String> collectionNamePath,
@@ -170,6 +194,7 @@ DocumentReference _deserializeDocumentReference(
   return FirebaseFirestore.instance.doc(path);
 }
 
+/// Enum representing different parameter types for serialization/deserialization.
 enum ParamType {
   int,
   double,
@@ -182,13 +207,16 @@ enum ParamType {
   FFPlace,
   FFUploadedFile,
   JSON,
-
   Document,
   DocumentReference,
   DataStruct,
   Enum,
 }
 
+/// Deserializes a parameter based on its type.
+/// 
+/// This function handles various parameter types and converts string representations
+/// back to their original types. It also supports deserializing lists of parameters.
 dynamic deserializeParam<T>(
   String? param,
   ParamType paramType,
@@ -247,14 +275,11 @@ dynamic deserializeParam<T>(
         return json.decode(param);
       case ParamType.DocumentReference:
         return _deserializeDocumentReference(param, collectionNamePath ?? []);
-
       case ParamType.DataStruct:
         final data = json.decode(param) as Map<String, dynamic>? ?? {};
         return structBuilder != null ? structBuilder(data) : null;
-
       case ParamType.Enum:
         return deserializeEnum<T>(param);
-
       default:
         return null;
     }
@@ -264,6 +289,7 @@ dynamic deserializeParam<T>(
   }
 }
 
+/// Returns a function that retrieves a document based on its ID.
 Future<dynamic> Function(String) getDoc(
   List<String> collectionNamePath,
   RecordBuilder recordBuilder,
@@ -273,6 +299,7 @@ Future<dynamic> Function(String) getDoc(
       .then((s) => recordBuilder(s));
 }
 
+/// Returns a function that retrieves a list of documents based on their IDs.
 Future<List<T>> Function(String) getDocList<T>(
   List<String> collectionNamePath,
   RecordBuilder<T> recordBuilder,

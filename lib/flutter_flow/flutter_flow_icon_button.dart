@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
+/// A customizable icon button widget with various styling options and loading indicator support.
 class FlutterFlowIconButton extends StatefulWidget {
   const FlutterFlowIconButton({
     super.key,
@@ -18,17 +19,40 @@ class FlutterFlowIconButton extends StatefulWidget {
     this.showLoadingIndicator = false,
   });
 
+  /// The icon to display in the button.
   final Widget icon;
+
+  /// The border radius of the button.
   final double? borderRadius;
+
+  /// The size of the button.
   final double? buttonSize;
+
+  /// The background color of the button.
   final Color? fillColor;
+
+  /// The color of the button when it's disabled.
   final Color? disabledColor;
+
+  /// The color of the icon when the button is disabled.
   final Color? disabledIconColor;
+
+  /// The color of the button when it's hovered over.
   final Color? hoverColor;
+
+  /// The color of the icon when the button is hovered over.
   final Color? hoverIconColor;
+
+  /// The color of the button's border.
   final Color? borderColor;
+
+  /// The width of the button's border.
   final double? borderWidth;
+
+  /// Whether to show a loading indicator when the button is pressed.
   final bool showLoadingIndicator;
+
+  /// The function to call when the button is pressed.
   final Function()? onPressed;
 
   @override
@@ -36,9 +60,16 @@ class FlutterFlowIconButton extends StatefulWidget {
 }
 
 class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
+  // Indicates whether the button is in a loading state
   bool loading = false;
+
+  // Stores the icon size extracted from the widget's icon
   late double? iconSize;
+
+  // Stores the icon color extracted from the widget's icon
   late Color? iconColor;
+
+  // The effective icon to be displayed, considering FontAwesome or regular Icon
   late Widget effectiveIcon;
 
   @override
@@ -53,6 +84,7 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
     _updateIcon();
   }
 
+  /// Updates the icon properties based on the widget's icon type (FontAwesome or regular Icon).
   void _updateIcon() {
     final isFontAwesome = widget.icon is FaIcon;
     if (isFontAwesome) {
@@ -76,7 +108,9 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
 
   @override
   Widget build(BuildContext context) {
+    // Define the button style with dynamic properties
     ButtonStyle style = ButtonStyle(
+      // Define the shape of the button
       shape: WidgetStateProperty.resolveWith<OutlinedBorder>(
         (states) {
           return RoundedRectangleBorder(
@@ -88,6 +122,7 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
           );
         },
       ),
+      // Define the icon color based on the button state
       iconColor: WidgetStateProperty.resolveWith<Color?>(
         (states) {
           if (states.contains(WidgetState.disabled) &&
@@ -101,6 +136,7 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
           return iconColor;
         },
       ),
+      // Define the background color based on the button state
       backgroundColor: WidgetStateProperty.resolveWith<Color?>(
         (states) {
           if (states.contains(WidgetState.disabled) &&
@@ -111,10 +147,10 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
               widget.hoverColor != null) {
             return widget.hoverColor;
           }
-
           return widget.fillColor;
         },
       ),
+      // Define the overlay color for the pressed state
       overlayColor: WidgetStateProperty.resolveWith<Color?>((states) {
         if (states.contains(WidgetState.pressed)) {
           return null;
@@ -132,6 +168,7 @@ class _FlutterFlowIconButtonState extends State<FlutterFlowIconButton> {
           useMaterial3: true,
         ),
         child: IgnorePointer(
+          // Disable interaction when loading
           ignoring: (widget.showLoadingIndicator && loading),
           child: IconButton(
             icon: (widget.showLoadingIndicator && loading)

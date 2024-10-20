@@ -2,15 +2,19 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
+// Key for storing theme mode in SharedPreferences
 const kThemeModeKey = '__theme_mode__';
 SharedPreferences? _prefs;
 
+/// Abstract class defining the theme for the FlutterFlow application
 abstract class FlutterFlowTheme {
+  /// Initialize SharedPreferences for theme storage
   static Future initialize() async =>
       _prefs = await SharedPreferences.getInstance();
+
+  /// Get the current theme mode
   static ThemeMode get themeMode {
     final darkMode = _prefs?.getBool(kThemeModeKey);
     return darkMode == null
@@ -20,16 +24,19 @@ abstract class FlutterFlowTheme {
             : ThemeMode.light;
   }
 
+  /// Save the current theme mode
   static void saveThemeMode(ThemeMode mode) => mode == ThemeMode.system
       ? _prefs?.remove(kThemeModeKey)
       : _prefs?.setBool(kThemeModeKey, mode == ThemeMode.dark);
 
+  /// Get the appropriate theme based on the current brightness
   static FlutterFlowTheme of(BuildContext context) {
     return Theme.of(context).brightness == Brightness.dark
         ? DarkModeTheme()
         : LightModeTheme();
   }
 
+  // Deprecated color getters
   @Deprecated('Use primary instead')
   Color get primaryColor => primary;
   @Deprecated('Use secondary instead')
@@ -37,6 +44,7 @@ abstract class FlutterFlowTheme {
   @Deprecated('Use tertiary instead')
   Color get tertiaryColor => tertiary;
 
+  // Color definitions
   late Color primary;
   late Color secondary;
   late Color tertiary;
@@ -54,6 +62,7 @@ abstract class FlutterFlowTheme {
   late Color error;
   late Color info;
 
+  // Deprecated text style getters
   @Deprecated('Use displaySmallFamily instead')
   String get title1Family => displaySmallFamily;
   @Deprecated('Use displaySmall instead')
@@ -83,6 +92,7 @@ abstract class FlutterFlowTheme {
   @Deprecated('Use bodySmall instead')
   TextStyle get bodyText2 => typography.bodySmall;
 
+  // Text style getters
   String get displayLargeFamily => typography.displayLargeFamily;
   TextStyle get displayLarge => typography.displayLarge;
   String get displayMediumFamily => typography.displayMediumFamily;
@@ -117,6 +127,7 @@ abstract class FlutterFlowTheme {
   Typography get typography => ThemeTypography(this);
 }
 
+/// Light mode theme implementation
 class LightModeTheme extends FlutterFlowTheme {
   @Deprecated('Use primary instead')
   Color get primaryColor => primary;
@@ -125,6 +136,7 @@ class LightModeTheme extends FlutterFlowTheme {
   @Deprecated('Use tertiary instead')
   Color get tertiaryColor => tertiary;
 
+  // Color definitions for light mode
   late Color primary = const Color(0xFF4B39EF);
   late Color secondary = const Color(0xFF39D2C0);
   late Color tertiary = const Color(0xFFEE8B60);
@@ -143,6 +155,7 @@ class LightModeTheme extends FlutterFlowTheme {
   late Color info = const Color(0xFFFFFFFF);
 }
 
+/// Abstract class defining typography styles
 abstract class Typography {
   String get displayLargeFamily;
   TextStyle get displayLarge;
@@ -176,11 +189,13 @@ abstract class Typography {
   TextStyle get bodySmall;
 }
 
+/// Implementation of Typography for the theme
 class ThemeTypography extends Typography {
   ThemeTypography(this.theme);
 
   final FlutterFlowTheme theme;
 
+  // Typography definitions
   String get displayLargeFamily => 'Outfit';
   TextStyle get displayLarge => GoogleFonts.getFont(
         'Outfit',
@@ -288,6 +303,7 @@ class ThemeTypography extends Typography {
       );
 }
 
+/// Dark mode theme implementation
 class DarkModeTheme extends FlutterFlowTheme {
   @Deprecated('Use primary instead')
   Color get primaryColor => primary;
@@ -296,6 +312,7 @@ class DarkModeTheme extends FlutterFlowTheme {
   @Deprecated('Use tertiary instead')
   Color get tertiaryColor => tertiary;
 
+  // Color definitions for dark mode
   late Color primary = const Color(0xFF4B39EF);
   late Color secondary = const Color(0xFF39D2C0);
   late Color tertiary = const Color(0xFFEE8B60);
@@ -314,7 +331,9 @@ class DarkModeTheme extends FlutterFlowTheme {
   late Color info = const Color(0xFFFFFFFF);
 }
 
+/// Extension to provide additional functionality to TextStyle
 extension TextStyleHelper on TextStyle {
+  /// Override specific properties of the TextStyle
   TextStyle override({
     String? fontFamily,
     Color? color,

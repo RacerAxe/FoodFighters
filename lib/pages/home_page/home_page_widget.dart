@@ -1,3 +1,4 @@
+// Import necessary packages and files
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_charts.dart';
@@ -13,6 +14,7 @@ import 'package:percent_indicator/percent_indicator.dart';
 import 'home_page_model.dart';
 export 'home_page_model.dart';
 
+// Define the HomePageWidget as a StatefulWidget
 class HomePageWidget extends StatefulWidget {
   const HomePageWidget({super.key});
 
@@ -22,7 +24,6 @@ class HomePageWidget extends StatefulWidget {
 
 class _HomePageWidgetState extends State<HomePageWidget> {
   late HomePageModel _model;
-
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -30,9 +31,9 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     super.initState();
     _model = createModel(context, () => HomePageModel());
 
-    // On page load action.
+    // Execute actions after the widget is fully rendered
     SchedulerBinding.instance.addPostFrameCallback((_) async {
-      // Get user preference
+      // Fetch user preferences
       _model.userPrefData = await queryUserPrefRecordOnce(
         queryBuilder: (userPrefRecord) => userPrefRecord.where(
           'uid',
@@ -40,118 +41,59 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         ),
         singleRecord: true,
       ).then((s) => s.firstOrNull);
+
       if (_model.userPrefData != null) {
         await Future.wait([
+          // Fetch and process today's meal data
           Future(() async {
-            // Get today meal data
+            // Retrieve today's meals
             _model.todayMeals = await queryMealTrackingRecordOnce(
               queryBuilder: (mealTrackingRecord) => mealTrackingRecord
-                  .where(
-                    'uid',
-                    isEqualTo: currentUserReference,
-                  )
-                  .where(
-                    'date',
-                    isGreaterThanOrEqualTo: functions.getTodayMidnightTime(),
-                  ),
+                  .where('uid', isEqualTo: currentUserReference)
+                  .where('date', isGreaterThanOrEqualTo: functions.getTodayMidnightTime()),
             );
-            // Update Top Calories Breakdown
-            _model.proteinData = valueOrDefault<String>(
-              (List<double> input) {
-                return double.parse(
-                        input.reduce((a, b) => a + b).toStringAsFixed(1))
-                    .toString();
-              }(_model.todayMeals!
-                  .map((e) => valueOrDefault<double>(
-                        e.protein,
-                        0.0,
-                      ))
-                  .toList()
-                  .toList()),
-              '0',
-            );
-            _model.carbsData = valueOrDefault<String>(
-              (List<double> input) {
-                return double.parse(
-                        input.reduce((a, b) => a + b).toStringAsFixed(1))
-                    .toString();
-              }(_model.todayMeals!
-                  .map((e) => valueOrDefault<double>(
-                        e.carbs,
-                        0.0,
-                      ))
-                  .toList()
-                  .toList()),
-              '0',
-            );
-            _model.fatData = valueOrDefault<String>(
-              (List<double> input) {
-                return double.parse(
-                        input.reduce((a, b) => a + b).toStringAsFixed(1))
-                    .toString();
-              }(_model.todayMeals!
-                  .map((e) => valueOrDefault<double>(
-                        e.fat,
-                        0.0,
-                      ))
-                  .toList()
-                  .toList()),
-              '0',
-            );
-            _model.caloriesData = valueOrDefault<String>(
-              (List<double> input) {
-                return input.reduce((a, b) => a + b).toString();
-              }(_model.todayMeals!
-                  .map((e) => valueOrDefault<double>(
-                        e.calories,
-                        0.0,
-                      ))
-                  .toList()
-                  .toList()),
-              '0',
-            );
-            _model.calorieGoal = valueOrDefault<String>(
-              functions.getCalorieGoal(_model.userPrefData!),
-              '0',
-            );
-            _model.remaining = valueOrDefault<String>(
-              functions.calculateRemaining(
-                  _model.calorieGoal, _model.caloriesData!),
-              '0',
-            );
+
+            // Calculate and update nutritional data
+            _model.proteinData = _calculateNutrientTotal(_model.todayMeals!, (e) => e.protein);
+            _model.carbsData = _calculateNutrientTotal(_model.todayMeals!, (e) => e.carbs);
+            _model.fatData = _calculateNutrientTotal(_model.todayMeals!, (e) => e.fat);
+            _model.caloriesData = _calculateNutrientTotal(_model.todayMeals!, (e) => e.calories);
+
+            // Set calorie goal and calculate remaining calories
+            _model.calorieGoal = functions.getCalorieGoal(_model.userPrefData!);
+            _model.remaining = functions.calculateRemaining(_model.calorieGoal, _model.caloriesData!);
           }),
+
+          // Fetch and process current week's meal data
           Future(() async {
-            // Get current week meal data
+            // Retrieve current week's meals
             _model.currWeekMeals = await queryMealTrackingRecordOnce(
               queryBuilder: (mealTrackingRecord) => mealTrackingRecord
-                  .where(
-                    'uid',
-                    isEqualTo: currentUserReference,
-                  )
-                  .where(
-                    'date',
-                    isGreaterThanOrEqualTo: functions.getMonday(),
-                  ),
+                  .where('uid', isEqualTo: currentUserReference)
+                  .where('date', isGreaterThanOrEqualTo: functions.getMonday()),
             );
-            // Update Barchart
-            _model.weeklyCalories = functions
-                .getWeeklyCalories(_model.currWeekMeals?.toList())
+
+            // Update weekly calorie data for bar chart
+            _model.weeklyCalories = functions.getWeeklyCalories(_model.currWeekMeals?.toList())
                 .toList()
                 .cast<double>();
           }),
         ]);
       } else {
-        // Go to User Form
-
+        // Redirect to User Form if user preferences are not set
         context.goNamed('User_Form');
       }
     });
   }
 
+  // Helper method to calculate nutrient totals
+  String _calculateNutrientTotal(List<MealTrackingRecord> meals, double? Function(MealTrackingRecord) getValue) {
+    return (meals.map(getValue).whereType<double>().reduce((a, b) => a + b).toStringAsFixed(1));
+  }
+
   @override
   void dispose() {
     _model.dispose();
-
     super.dispose();
   }
 
@@ -228,6 +170,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
+                // Daily summary container
                 Container(
                   width: double.infinity,
                   height: 140.0,
@@ -240,10 +183,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                       BoxShadow(
                         blurRadius: 3.0,
                         color: Color(0x33000000),
-                        offset: Offset(
-                          0.0,
-                          1.0,
-                        ),
+                        offset: Offset(0.0, 1.0),
                       )
                     ],
                   ),
@@ -254,13 +194,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Padding(
-                          padding: const EdgeInsetsDirectional.fromSTEB(
-                              16.0, 0.0, 0.0, 0.0),
+                          padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 0.0, 0.0),
                           child: Text(
                             'Daily summary',
-                            style: FlutterFlowTheme.of(context)
-                                .labelMedium
-                                .override(
+                            style: FlutterFlowTheme.of(context).labelMedium.override(
                                   fontFamily: 'Readex Pro',
                                   letterSpacing: 0.0,
                                 ),
@@ -268,184 +205,33 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         ),
                         Expanded(
                           child: Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 8.0, 0.0, 0.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
                             child: ListView(
                               padding: EdgeInsets.zero,
                               primary: false,
                               shrinkWrap: true,
                               scrollDirection: Axis.horizontal,
                               children: [
-                                Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      12.0, 0.0, 16.0, 8.0),
-                                  child: Container(
-                                    width: 120.0,
-                                    height: 100.0,
-                                    decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryBackground,
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      border: Border.all(
-                                        color: const Color(0xFFE0E3E7),
-                                        width: 2.0,
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            valueOrDefault<String>(
-                                              _model.proteinData,
-                                              '0',
-                                            ),
-                                            style: FlutterFlowTheme.of(context)
-                                                .displaySmall
-                                                .override(
-                                                  fontFamily: 'Outfit',
-                                                  letterSpacing: 0.0,
-                                                ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 4.0, 0.0, 0.0),
-                                            child: Text(
-                                              'Protein',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .override(
-                                                        fontFamily:
-                                                            'Readex Pro',
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                // Protein summary
+                                _buildNutrientSummary(
+                                  context: context,
+                                  value: _model.proteinData ?? '',
+                                  label: 'Protein',
+                                  color: FlutterFlowTheme.of(context).primaryText,
                                 ),
-                                Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 16.0, 8.0),
-                                  child: Container(
-                                    width: 120.0,
-                                    height: 100.0,
-                                    decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryBackground,
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      border: Border.all(
-                                        color: const Color(0xFFE0E3E7),
-                                        width: 2.0,
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            valueOrDefault<String>(
-                                              _model.carbsData,
-                                              '0',
-                                            ),
-                                            style: FlutterFlowTheme.of(context)
-                                                .displaySmall
-                                                .override(
-                                                  fontFamily: 'Outfit',
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .tertiary,
-                                                  letterSpacing: 0.0,
-                                                ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 4.0, 0.0, 0.0),
-                                            child: Text(
-                                              'Carbs',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .override(
-                                                        fontFamily:
-                                                            'Readex Pro',
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                // Carbs summary
+                                _buildNutrientSummary(
+                                  context: context,
+                                  value: _model.carbsData ?? '',
+                                  label: 'Carbs',
+                                  color: FlutterFlowTheme.of(context).tertiary,
                                 ),
-                                Padding(
-                                  padding: const EdgeInsetsDirectional.fromSTEB(
-                                      0.0, 0.0, 16.0, 8.0),
-                                  child: Container(
-                                    width: 120.0,
-                                    height: 100.0,
-                                    decoration: BoxDecoration(
-                                      color: FlutterFlowTheme.of(context)
-                                          .secondaryBackground,
-                                      borderRadius: BorderRadius.circular(8.0),
-                                      border: Border.all(
-                                        color: const Color(0xFFE0E3E7),
-                                        width: 2.0,
-                                      ),
-                                    ),
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(12.0),
-                                      child: Column(
-                                        mainAxisSize: MainAxisSize.max,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            valueOrDefault<String>(
-                                              _model.fatData,
-                                              '0',
-                                            ),
-                                            style: FlutterFlowTheme.of(context)
-                                                .displaySmall
-                                                .override(
-                                                  fontFamily: 'Outfit',
-                                                  color: FlutterFlowTheme.of(
-                                                          context)
-                                                      .secondary,
-                                                  letterSpacing: 0.0,
-                                                ),
-                                          ),
-                                          Padding(
-                                            padding:
-                                                const EdgeInsetsDirectional.fromSTEB(
-                                                    0.0, 4.0, 0.0, 0.0),
-                                            child: Text(
-                                              'Fat',
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelMedium
-                                                      .override(
-                                                        fontFamily:
-                                                            'Readex Pro',
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
+                                // Fat summary
+                                _buildNutrientSummary(
+                                  context: context,
+                                  value: _model.fatData ?? '',
+                                  label: 'Fat',
+                                  color: FlutterFlowTheme.of(context).secondary,
                                 ),
                               ],
                             ),
@@ -455,10 +241,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     ),
                   ),
                 ),
+                // Today's consumption container
                 Flexible(
                   child: Padding(
-                    padding:
-                        const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 24.0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(16.0, 12.0, 16.0, 24.0),
                     child: Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
@@ -467,10 +253,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                           BoxShadow(
                             blurRadius: 3.0,
                             color: Color(0x33000000),
-                            offset: Offset(
-                              0.0,
-                              1.0,
-                            ),
+                            offset: Offset(0.0, 1.0),
                           )
                         ],
                         borderRadius: BorderRadius.circular(8.0),
@@ -486,13 +269,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 0.0, 0.0, 8.0),
+                              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 8.0),
                               child: Text(
                                 'Today\'s Consumption',
-                                style: FlutterFlowTheme.of(context)
-                                    .headlineMedium
-                                    .override(
+                                style: FlutterFlowTheme.of(context).headlineMedium.override(
                                       fontFamily: 'Outfit',
                                       letterSpacing: 0.0,
                                       fontWeight: FontWeight.w500,
@@ -501,145 +281,30 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                             ),
                             Text(
                               'Total Calories/Daily Goal',
-                              style: FlutterFlowTheme.of(context)
-                                  .labelMedium
-                                  .override(
+                              style: FlutterFlowTheme.of(context).labelMedium.override(
                                     fontFamily: 'Readex Pro',
                                     letterSpacing: 0.0,
                                   ),
                             ),
                             Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0.0, 12.0, 0.0, 12.0),
+                              padding: const EdgeInsetsDirectional.fromSTEB(0.0, 12.0, 0.0, 12.0),
                               child: Row(
                                 mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Column(
                                     mainAxisSize: MainAxisSize.max,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      RichText(
-                                        textScaler:
-                                            MediaQuery.of(context).textScaler,
-                                        text: TextSpan(
-                                          children: [
-                                            TextSpan(
-                                              text: valueOrDefault<String>(
-                                                double.parse(double.parse(
-                                                            (_model
-                                                                .caloriesData!))
-                                                        .toStringAsFixed(1))
-                                                    .toString(),
-                                                '0',
-                                              ),
-                                              style: const TextStyle(),
-                                            ),
-                                            const TextSpan(
-                                              text: '/',
-                                              style: TextStyle(),
-                                            ),
-                                            TextSpan(
-                                              text: valueOrDefault<String>(
-                                                _model.calorieGoal,
-                                                '0',
-                                              ),
-                                              style:
-                                                  FlutterFlowTheme.of(context)
-                                                      .labelLarge
-                                                      .override(
-                                                        fontFamily:
-                                                            'Readex Pro',
-                                                        letterSpacing: 0.0,
-                                                      ),
-                                            )
-                                          ],
-                                          style: FlutterFlowTheme.of(context)
-                                              .displaySmall
-                                              .override(
-                                                fontFamily: 'Outfit',
-                                                letterSpacing: 0.0,
-                                              ),
-                                        ),
+                                      _buildCalorieProgressText(context),
+                                      Padding(
+                                        padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                                        child: _buildCalorieProgressBar(context),
                                       ),
                                       Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 8.0, 0.0, 0.0),
-                                        child: LinearPercentIndicator(
-                                          percent: valueOrDefault<double>(
-                                            math.min(
-                                                double.parse((_model
-                                                        .caloriesData!)) /
-                                                    double.parse(
-                                                        _model.calorieGoal),
-                                                1.0),
-                                            0.0,
-                                          ),
-                                          width:
-                                              MediaQuery.sizeOf(context).width *
-                                                  0.85,
-                                          lineHeight: 12.0,
-                                          animation: true,
-                                          animateFromLastPercent: true,
-                                          progressColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .primary,
-                                          backgroundColor:
-                                              FlutterFlowTheme.of(context)
-                                                  .accent1,
-                                          barRadius: const Radius.circular(16.0),
-                                          padding: EdgeInsets.zero,
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsetsDirectional.fromSTEB(
-                                            0.0, 8.0, 0.0, 0.0),
-                                        child: RichText(
-                                          textScaler:
-                                              MediaQuery.of(context).textScaler,
-                                          text: TextSpan(
-                                            children: [
-                                              const TextSpan(
-                                                text: 'Remaining: ',
-                                                style: TextStyle(),
-                                              ),
-                                              TextSpan(
-                                                text: valueOrDefault<String>(
-                                                  double.parse(math
-                                                          .max(
-                                                              double.parse(_model
-                                                                      .calorieGoal) -
-                                                                  double.parse(
-                                                                      (_model
-                                                                          .caloriesData!)),
-                                                              0)
-                                                          .toStringAsFixed(1))
-                                                      .toString(),
-                                                  '0',
-                                                ),
-                                                style:
-                                                    FlutterFlowTheme.of(context)
-                                                        .bodyMedium
-                                                        .override(
-                                                          fontFamily:
-                                                              'Readex Pro',
-                                                          letterSpacing: 0.0,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                        ),
-                                              )
-                                            ],
-                                            style: FlutterFlowTheme.of(context)
-                                                .labelMedium
-                                                .override(
-                                                  fontFamily: 'Readex Pro',
-                                                  letterSpacing: 0.0,
-                                                ),
-                                          ),
-                                        ),
+                                        padding: const EdgeInsetsDirectional.fromSTEB(0.0, 8.0, 0.0, 0.0),
+                                        child: _buildRemainingCaloriesText(context),
                                       ),
                                     ].divide(const SizedBox(height: 4.0)),
                                   ),
@@ -652,9 +317,9 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                     ),
                   ),
                 ),
+                // Weekly activities container
                 Padding(
-                  padding:
-                      const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 24.0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(16.0, 0.0, 16.0, 24.0),
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
@@ -663,10 +328,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         BoxShadow(
                           blurRadius: 3.0,
                           color: Color(0x33000000),
-                          offset: Offset(
-                            0.0,
-                            1.0,
-                          ),
+                          offset: Offset(0.0, 1.0),
                         )
                       ],
                       borderRadius: BorderRadius.circular(8.0),
@@ -678,13 +340,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0.0, 0.0, 0.0, 8.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(0.0, 0.0, 0.0, 8.0),
                             child: Text(
                               'Weekly Activities',
-                              style: FlutterFlowTheme.of(context)
-                                  .headlineSmall
-                                  .override(
+                              style: FlutterFlowTheme.of(context).headlineSmall.override(
                                     fontFamily: 'Outfit',
                                     letterSpacing: 0.0,
                                   ),
@@ -692,49 +351,17 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                           ),
                           Text(
                             'Overview of calories breakdown',
-                            style: FlutterFlowTheme.of(context)
-                                .labelMedium
-                                .override(
+                            style: FlutterFlowTheme.of(context).labelMedium.override(
                                   fontFamily: 'Readex Pro',
                                   letterSpacing: 0.0,
                                 ),
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                16.0, 16.0, 16.0, 5.0),
+                            padding: const EdgeInsetsDirectional.fromSTEB(16.0, 16.0, 16.0, 5.0),
                             child: SizedBox(
                               width: double.infinity,
                               height: 150.0,
-                              child: FlutterFlowBarChart(
-                                barData: [
-                                  FFBarChartData(
-                                    yData: _model.weeklyCalories,
-                                    color: FlutterFlowTheme.of(context).primary,
-                                  )
-                                ],
-                                xLabels: _model.weekLetter,
-                                barWidth: 30.0,
-                                barBorderRadius: const BorderRadius.only(
-                                  bottomLeft: Radius.circular(0.0),
-                                  bottomRight: Radius.circular(0.0),
-                                  topLeft: Radius.circular(0.0),
-                                  topRight: Radius.circular(0.0),
-                                ),
-                                groupSpace: 15.0,
-                                chartStylingInfo: ChartStylingInfo(
-                                  enableTooltip: true,
-                                  backgroundColor: FlutterFlowTheme.of(context)
-                                      .secondaryBackground,
-                                  showBorder: false,
-                                ),
-                                axisBounds: const AxisBounds(),
-                                xAxisLabelInfo: const AxisLabelInfo(
-                                  showLabels: true,
-                                  labelTextStyle: TextStyle(),
-                                  labelInterval: 10.0,
-                                ),
-                                yAxisLabelInfo: const AxisLabelInfo(),
-                              ),
+                              child: _buildWeeklyCaloriesChart(context),
                             ),
                           ),
                         ],
@@ -747,6 +374,174 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           ),
         ),
       ),
+    );
+  }
+
+  // Helper method to build nutrient summary widget
+  Widget _buildNutrientSummary({
+    required BuildContext context,
+    required String value,
+    required String label,
+    required Color color,
+  }) {
+    return Padding(
+      padding: const EdgeInsetsDirectional.fromSTEB(12.0, 0.0, 16.0, 8.0),
+      child: Container(
+        width: 120.0,
+        height: 100.0,
+        decoration: BoxDecoration(
+          color: FlutterFlowTheme.of(context).secondaryBackground,
+          borderRadius: BorderRadius.circular(8.0),
+          border: Border.all(
+            color: const Color(0xFFE0E3E7),
+            width: 2.0,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                value,
+                style: FlutterFlowTheme.of(context).displaySmall.override(
+                      fontFamily: 'Outfit',
+                      color: color,
+                      letterSpacing: 0.0,
+                    ),
+              ),
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(0.0, 4.0, 0.0, 0.0),
+                child: Text(
+                  label,
+                  style: FlutterFlowTheme.of(context).labelMedium.override(
+                        fontFamily: 'Readex Pro',
+                        letterSpacing: 0.0,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Helper method to build calorie progress text
+  Widget _buildCalorieProgressText(BuildContext context) {
+    return RichText(
+      textScaler: MediaQuery.of(context).textScaler,
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: valueOrDefault<String>(
+              double.parse(double.parse((_model.caloriesData!)).toStringAsFixed(1)).toString(),
+              '0',
+            ),
+            style: const TextStyle(),
+          ),
+          const TextSpan(
+            text: '/',
+            style: TextStyle(),
+          ),
+          TextSpan(
+            text: valueOrDefault<String>(
+              _model.calorieGoal,
+              '0',
+            ),
+            style: FlutterFlowTheme.of(context).labelLarge.override(
+                  fontFamily: 'Readex Pro',
+                  letterSpacing: 0.0,
+                ),
+          )
+        ],
+        style: FlutterFlowTheme.of(context).displaySmall.override(
+              fontFamily: 'Outfit',
+              letterSpacing: 0.0,
+            ),
+      ),
+    );
+  }
+
+  // Helper method to build calorie progress bar
+  Widget _buildCalorieProgressBar(BuildContext context) {
+    return LinearPercentIndicator(
+      percent: valueOrDefault<double>(
+        math.min(double.parse((_model.caloriesData!)) / double.parse(_model.calorieGoal), 1.0),
+        0.0,
+      ),
+      width: MediaQuery.sizeOf(context).width * 0.85,
+      lineHeight: 12.0,
+      animation: true,
+      animateFromLastPercent: true,
+      progressColor: FlutterFlowTheme.of(context).primary,
+      backgroundColor: FlutterFlowTheme.of(context).accent1,
+      barRadius: const Radius.circular(16.0),
+      padding: EdgeInsets.zero,
+    );
+  }
+
+  // Helper method to build remaining calories text
+  Widget _buildRemainingCaloriesText(BuildContext context) {
+    return RichText(
+      textScaler: MediaQuery.of(context).textScaler,
+      text: TextSpan(
+        children: [
+          const TextSpan(
+            text: 'Remaining: ',
+            style: TextStyle(),
+          ),
+          TextSpan(
+            text: valueOrDefault<String>(
+              double.parse(math.max(double.parse(_model.calorieGoal) - double.parse((_model.caloriesData!)), 0).toStringAsFixed(1)).toString(),
+              '0',
+            ),
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  fontFamily: 'Readex Pro',
+                  letterSpacing: 0.0,
+                  fontWeight: FontWeight.bold,
+                ),
+          )
+        ],
+        style: FlutterFlowTheme.of(context).labelMedium.override(
+              fontFamily: 'Readex Pro',
+              letterSpacing: 0.0,
+            ),
+      ),
+    );
+  }
+
+  // Helper method to build weekly calories chart
+  Widget _buildWeeklyCaloriesChart(BuildContext context) {
+    return FlutterFlowBarChart(
+      barData: [
+        FFBarChartData(
+          yData: _model.weeklyCalories,
+          color: FlutterFlowTheme.of(context).primary,
+        )
+      ],
+      xLabels: _model.weekLetter,
+      barWidth: 30.0,
+      barBorderRadius: const BorderRadius.only(
+        bottomLeft: Radius.circular(0.0),
+        bottomRight: Radius.circular(0.0),
+        topLeft: Radius.circular(0.0),
+        topRight: Radius.circular(0.0),
+      ),
+      groupSpace: 15.0,
+      chartStylingInfo: ChartStylingInfo(
+        enableTooltip: true,
+        backgroundColor: FlutterFlowTheme.of(context).secondaryBackground,
+        showBorder: false,
+      ),
+      axisBounds: const AxisBounds(),
+      xAxisLabelInfo: const AxisLabelInfo(
+        showLabels: true,
+        labelTextStyle: TextStyle(),
+        labelInterval: 10.0,
+      ),
+      yAxisLabelInfo: const AxisLabelInfo(),
     );
   }
 }

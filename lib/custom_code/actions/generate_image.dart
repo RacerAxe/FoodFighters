@@ -13,32 +13,53 @@ import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-final String _apiKey =
-    ''; // Replace with your API key
+// API key for OpenAI. Replace this with your actual API key.
+final String _apiKey = '';
 
+/// Generates an image using OpenAI's DALL-E 3 model.
+///
+/// This function takes a [prompt] as input and returns a [Future<String>]
+/// containing the URL of the generated image.
+///
+/// Parameters:
+///   - prompt: A string describing the image to be generated.
+///
+/// Returns:
+///   A Future that resolves to the URL of the generated image.
+///
+/// Throws:
+///   An exception if the API request fails.
 Future<String> generateImage(String prompt) async {
-  final url =
-      'https://api.openai.com/v1/images/generations'; // Update to the correct endpoint
+  // API endpoint for OpenAI's image generation
+  final url = 'https://api.openai.com/v1/images/generations';
 
-  final response = await http.post(
-    Uri.parse(url),
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $_apiKey',
-    },
-    body: jsonEncode({
-      'model': 'dall-e-3',
-      'prompt': prompt,
-      'size': '1024x1024',
-    }),
-  );
+  try {
+    // Send POST request to OpenAI API
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $_apiKey',
+      },
+      body: jsonEncode({
+        'model': 'dall-e-3',
+        'prompt': prompt,
+        'size': '1024x1024', // Specifies the size of the generated image
+      }),
+    );
 
-  if (response.statusCode == 200) {
-    final data = jsonDecode(response.body);
-    return data['data'][0]
-        ['url']; // Adjust according to the actual response format
-  } else {
-    throw Exception('Failed to generate image: ${response.body}');
+    // Check if the request was successful
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      // Extract and return the URL of the generated image
+      return data['data'][0]['url'];
+    } else {
+      // Throw an exception if the request failed
+      throw Exception('Failed to generate image: ${response.body}');
+    }
+  } catch (e) {
+    // Handle any errors that occur during the API request
+    throw Exception('Error generating image: $e');
   }
 }
 

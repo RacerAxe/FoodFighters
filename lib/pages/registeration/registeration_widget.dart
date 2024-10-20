@@ -1,3 +1,4 @@
+// Import necessary packages and files
 import '/auth/firebase_auth/auth_util.dart';
 import '/backend/backend.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
@@ -9,6 +10,7 @@ import 'package:flutter_keyboard_visibility/flutter_keyboard_visibility.dart';
 import 'registeration_model.dart';
 export 'registeration_model.dart';
 
+/// Widget for user registration screen
 class RegisterationWidget extends StatefulWidget {
   const RegisterationWidget({super.key});
 
@@ -28,6 +30,7 @@ class _RegisterationWidgetState extends State<RegisterationWidget> {
     super.initState();
     _model = createModel(context, () => RegisterationModel());
 
+    // Set up keyboard visibility listener for non-web platforms
     if (!isWeb) {
       _keyboardVisibilitySubscription =
           KeyboardVisibilityController().onChange.listen((bool visible) {
@@ -37,6 +40,7 @@ class _RegisterationWidgetState extends State<RegisterationWidget> {
       });
     }
 
+    // Initialize text controllers and focus nodes
     _model.displayNameFieldTextController ??= TextEditingController();
     _model.displayNameFieldFocusNode ??= FocusNode();
 
@@ -51,6 +55,7 @@ class _RegisterationWidgetState extends State<RegisterationWidget> {
   void dispose() {
     _model.dispose();
 
+    // Cancel keyboard visibility subscription for non-web platforms
     if (!isWeb) {
       _keyboardVisibilitySubscription.cancel();
     }
@@ -110,6 +115,7 @@ class _RegisterationWidgetState extends State<RegisterationWidget> {
                           mainAxisSize: MainAxisSize.max,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // Title
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   12.0, 32.0, 0.0, 8.0),
@@ -124,6 +130,7 @@ class _RegisterationWidgetState extends State<RegisterationWidget> {
                                     ),
                               ),
                             ),
+                            // Subtitle
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   12.0, 0.0, 0.0, 12.0),
@@ -138,6 +145,7 @@ class _RegisterationWidgetState extends State<RegisterationWidget> {
                                     ),
                               ),
                             ),
+                            // Display Name Field
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   16.0, 12.0, 16.0, 0.0),
@@ -217,6 +225,7 @@ class _RegisterationWidgetState extends State<RegisterationWidget> {
                                     .asValidator(context),
                               ),
                             ),
+                            // Email Field
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   16.0, 12.0, 16.0, 0.0),
@@ -294,6 +303,7 @@ class _RegisterationWidgetState extends State<RegisterationWidget> {
                                     .asValidator(context),
                               ),
                             ),
+                            // Password Field
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   16.0, 12.0, 16.0, 0.0),
@@ -392,6 +402,7 @@ class _RegisterationWidgetState extends State<RegisterationWidget> {
                       ),
                     ),
                   ),
+                  // Create Account Button
                   if (!(isWeb
                       ? MediaQuery.viewInsetsOf(context).bottom > 0
                       : _isKeyboardVisible))
@@ -412,6 +423,7 @@ class _RegisterationWidgetState extends State<RegisterationWidget> {
                             return;
                           }
 
+                          // Update user record with display name
                           await UserRecord.collection
                               .doc(user.uid)
                               .update(createUserRecordData(
@@ -419,8 +431,7 @@ class _RegisterationWidgetState extends State<RegisterationWidget> {
                                     _model.displayNameFieldTextController.text,
                               ));
 
-                          // Go To User Form
-
+                          // Navigate to Home Page
                           context.pushNamedAuth('Home_Page', context.mounted);
                         },
                         text: 'Create Account',

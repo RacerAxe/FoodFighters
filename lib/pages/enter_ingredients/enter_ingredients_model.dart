@@ -2,36 +2,43 @@ import '/flutter_flow/flutter_flow_util.dart';
 import 'enter_ingredients_widget.dart' show EnterIngredientsWidget;
 import 'package:flutter/material.dart';
 
+/// Model class for the EnterIngredients page, extending FlutterFlowModel.
 class EnterIngredientsModel extends FlutterFlowModel<EnterIngredientsWidget> {
-  ///  State fields for stateful widgets in this page.
+  /// State fields for stateful widgets in this page.
 
-  // State field(s) for PrepTime widget.
+  // PrepTime widget state
   FocusNode? prepTimeFocusNode;
   TextEditingController? prepTimeTextController;
   String? Function(BuildContext, String?)? prepTimeTextControllerValidator;
-  // State field(s) for CookTime widget.
+
+  // CookTime widget state
   FocusNode? cookTimeFocusNode;
   TextEditingController? cookTimeTextController;
   String? Function(BuildContext, String?)? cookTimeTextControllerValidator;
+
+  // File upload state
   bool isDataUploading = false;
   FFUploadedFile uploadedLocalFile =
       FFUploadedFile(bytes: Uint8List.fromList([]));
 
-  // State field(s) for InputIngredients widget.
+  // InputIngredients widget state
   FocusNode? inputIngredientsFocusNode;
   TextEditingController? inputIngredientsTextController;
   String? Function(BuildContext, String?)?
       inputIngredientsTextControllerValidator;
-  // Stores action output result for [Gemini - Text From Image] action in Button widget.
-  String? recipeDataStr;
-  // Stores action output result for [Custom Action - generateImage] action in Button widget.
-  String? outputIMG;
+
+  // Action output results
+  String? recipeDataStr; // Stores result from [Gemini - Text From Image] action
+  String? outputIMG; // Stores result from [Custom Action - generateImage] action
 
   @override
-  void initState(BuildContext context) {}
+  void initState(BuildContext context) {
+    // Initialize any necessary state here
+  }
 
   @override
   void dispose() {
+    // Dispose of focus nodes and text controllers
     prepTimeFocusNode?.dispose();
     prepTimeTextController?.dispose();
 
